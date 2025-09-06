@@ -1,0 +1,76 @@
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--muted);
+}
+
+.register-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 380px;
+}
+
+.register-icon {
+  display: flex;
+  justify-content: center;
+  font-size: 2rem;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem auto;
+  align-items: center;
+}
+
+.register-card h2 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.register-subtitle {
+  text-align: center;
+  color: var(--muted-foreground);
+  margin-bottom: 1.5rem;
+}
+
+.register-card input {
+  width: 100%;
+  padding: 0.7rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.register-card input:focus {
+  border-color: var(--primary);
+}
+
+.register-card button {
+  width: 100%;
+  padding: 0.8rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+.register-card button:hover {
+  opacity: 0.9;
+}
+
+.register-links {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
