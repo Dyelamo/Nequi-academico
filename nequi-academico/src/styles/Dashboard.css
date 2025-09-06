@@ -1,0 +1,91 @@
+.dashboard-container {
+  background: var(--muted);
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+header {
+  margin-bottom: 1.5rem;
+}
+
+header h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+header h1 span {
+  font-weight: bold;
+  color: var(--primary);
+}
+
+header p {
+  color: var(--muted-foreground);
+}
+
+.saldo-card {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.saldo-card h2 {
+  font-size: 2rem;
+  margin: 0.2rem 0;
+}
+
+.accesos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.acceso-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  padding: 1rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.acceso-card:hover {
+  transform: translateY(-3px);
+}
+
+.acceso-card span {
+  font-size: 1.5rem;
+}
+
+.transacciones-card {
+  background: var(--card);
+  padding: 1rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.transaccion {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.transaccion:last-child {
+  border-bottom: none;
+}
+
+.ingreso {
+  color: green;
+  font-weight: bold;
+}
+
+.egreso {
+  color: var(--destructive);
+  font-weight: bold;
+}
