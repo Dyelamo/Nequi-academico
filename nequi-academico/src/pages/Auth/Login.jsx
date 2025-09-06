@@ -2,18 +2,28 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import '../../styles/Login.css';
+import { useStoreUsuarios } from '../../supabase/storeUsuarios.jsx';
 
 const Login = () => {
   const [cedula, setCedula] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const { autenticarUsuario, loading, error } = useStoreUsuarios();
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (cedula && password) {
+    if(!cedula || !password){
+      alert("Por favor, completa todos los campos");
+      return;
+    }
+
+    try{
+      await autenticarUsuario(cedula, password);
+      alert("Inicio de sesión exitoso");
       navigate("/dashboard");
-    } else {
-      alert("Por favor ingresa tus credenciales");
+    }catch(error){
+      alert("Error al iniciar sesión: " + error.message);
     }
   };
 

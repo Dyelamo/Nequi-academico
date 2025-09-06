@@ -2,29 +2,47 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import '../../styles/Register.css';
+import { useStoreUsuarios } from "../../supabase/storeUsuarios";
+
 
 const Register = () => {
   const [form, setForm] = useState({
     cedula: "",
     nombre: "",
     correo: "",
+    telefono: "",
     password: "",
     confirmPassword: "",
   });
+
+  const { crearUsuario, loading, error } = useStoreUsuarios();
 
   const navigate = useNavigate();
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (form.password !== form.confirmPassword) {
       alert("Las contraseñas no coinciden");
       return;
     }
-    alert("Cuenta creada correctamente ✅");
-    navigate("/");
+
+
+    try{
+      await crearUsuario({
+        cedula: form.cedula,
+        nombre: form.nombre,
+        correo: form.correo,
+        telefono: form.telefono,
+        password: form.password
+      });
+      alert("Usuario creado exitosamente");
+      navigate("/");
+    }catch(error){
+      alert("Error al crear usuario: " + error.message);
+    }
   };
 
   return (
@@ -51,6 +69,12 @@ const Register = () => {
           placeholder="Correo Electrónico"
           type="email"
           value={form.correo}
+          onChange={handleChange}
+        />
+        <input
+          name="telefono"
+          placeholder="telefono"
+          value={form.telefono}
           onChange={handleChange}
         />
         <input
