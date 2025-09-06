@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Login from "../pages/Auth/Login";
+import Register from "../pages/Auth/Register";
 
 
 
@@ -13,7 +14,7 @@ const AppRouter = () => {
       <Routes>
         {/* Página de inicio (login por defecto) */}
         <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<Register />} /> 
 
         {/* Dashboard principal */}
         <Route path="/dashboard" element={<Dashboard />} />
