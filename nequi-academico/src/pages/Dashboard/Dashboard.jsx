@@ -1,11 +1,14 @@
 // src/pages/Dashboard/Dashboard.jsx
-import React, { useState } from "react";
+import React from "react";
 import '../../styles/Dashboard.css'
 import { useStoreUsuarios } from "../../supabase/storeUsuarios";
+import { useNavigate } from  'react-router-dom';
+import Simuladores from "../Simuladores/Simuladores";
 
 const Dashboard = () => {
   // const [saldo] = useState(1250000);
   const { currentUsuario } = useStoreUsuarios();
+  const navigate = useNavigate();
 
   const saldo = currentUsuario ? currentUsuario.saldo : 0;
   console.log("Saldo del usuario:", saldo);
@@ -14,7 +17,7 @@ console.log("Usuario actual:", currentUsuario);
 
   const accesos = [
     { titulo: "Solicitar Préstamo", icon: "💰" },
-    { titulo: "Calculadoras", icon: "📊" },
+    { titulo: "Calculadoras", icon: "📊", ruta: "/simuladores"},
     { titulo: "Historial", icon: "🕑" },
   ];
 
@@ -40,7 +43,8 @@ console.log("Usuario actual:", currentUsuario);
       <h3>Accesos Rápidos</h3>
       <div className="accesos-grid">
         {accesos.map((a, i) => (
-          <button key={i} className="acceso-card">
+          <button key={i} className="acceso-card"
+          onClick={() => navigate(a.ruta)}>
             <span>{a.icon}</span>
             <p>{a.titulo}</p>
           </button>

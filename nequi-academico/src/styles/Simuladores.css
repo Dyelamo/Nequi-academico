@@ -1,0 +1,72 @@
+.simuladores-container {
+  padding: 1.5rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+.tab.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: bold;
+}
+
+.tab-content {
+  background: var(--card);
+  padding: 1rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.formulario {
+  margin-top: 1rem;
+}
+
+.formulario input, .formulario select {
+  width: 100%;
+  padding: 0.7rem;
+  margin-bottom: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.formulario button {
+  width: 100%;
+  padding: 0.8rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.resultado {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.historial-item {
+  border-bottom: 1px solid var(--border);
+  padding: 0.8rem 0;
+}
+
+.historial-item:last-child {
+  border-bottom: none;
+}

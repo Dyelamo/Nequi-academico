@@ -1,0 +1,61 @@
+// src/pages/Simuladores/Simuladores.jsx
+import React, { useState } from "react";
+import "../../styles/simuladores.css";
+import InteresSimple from '../../components/simuladores/IntresSimple';
+import HistorialCalculos from '../../components/simuladores/HistorialCalculos';
+import InteresCompuesto from '../../components/simuladores/InteresCompuestos';
+import Anualidades from '../../components/simuladores/Anualidades';
+
+const Simuladores = () => {
+  const [tab, setTab] = useState("simple");
+  const [historial, setHistorial] = useState([]);
+
+  // función para agregar resultados al historial
+  const agregarAlHistorial = (registro) => {
+    setHistorial([registro, ...historial]);
+  };
+
+  return (
+    <div className="simuladores-container">
+      <h1>Simuladores Financieros</h1>
+
+      {/* Tabs */}
+      <div className="tabs">
+        <button
+          className={tab === "simple" ? "tab active" : "tab"}
+          onClick={() => setTab("simple")}
+        >
+          Interés Simple
+        </button>
+        <button
+          className={tab === "compuesto" ? "tab active" : "tab"}
+          onClick={() => setTab("compuesto")}
+        >
+          Interés Compuesto
+        </button>
+        <button
+          className={tab === "anualidades" ? "tab active" : "tab"}
+          onClick={() => setTab("anualidades")}
+        >
+          Anualidades
+        </button>
+        <button
+          className={tab === "historial" ? "tab active" : "tab"}
+          onClick={() => setTab("historial")}
+        >
+          Historial
+        </button>
+      </div>
+
+      {/* Contenido dinámico */}
+      <div className="tab-content">
+        {tab === "simple" && <InteresSimple agregarAlHistorial={agregarAlHistorial} />}
+        {tab === "compuesto" && <InteresCompuesto agregarAlHistorial={agregarAlHistorial} />}
+        {tab === "anualidades" && <Anualidades agregarAlHistorial={agregarAlHistorial} />}
+        {tab === "historial" && <HistorialCalculos historial={historial} />}
+      </div>
+    </div>
+  );
+};
+
+export default Simuladores;

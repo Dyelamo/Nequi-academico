@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
+import Simuladores from "../pages/Simuladores/Simuladores";
 import PrivateRoutes from "../utils/PrivateToutes";
 
 const AppRouter = () => {
@@ -22,7 +23,7 @@ const AppRouter = () => {
           }
         />
 
-
+        <Route path="/simuladores" element={<Simuladores />} />
 
       </Routes>
     </BrowserRouter>
