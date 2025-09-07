@@ -3,6 +3,7 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import Simuladores from "../pages/Simuladores/Simuladores";
+import  Prestamos  from "../pages/Prestamos/Prestamos";
 import PrivateRoutes from "../utils/PrivateToutes";
 
 const AppRouter = () => {
@@ -24,6 +25,7 @@ const AppRouter = () => {
         />
 
         <Route path="/simuladores" element={<Simuladores />} />
+        <Route path="/prestamos" element={<Prestamos />} />
 
       </Routes>
     </BrowserRouter>

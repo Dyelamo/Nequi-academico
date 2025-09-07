@@ -16,7 +16,7 @@ const Dashboard = () => {
 console.log("Usuario actual:", currentUsuario);
 
   const accesos = [
-    { titulo: "Solicitar Préstamo", icon: "💰" },
+    { titulo: "Solicitar Préstamo", icon: "💰", ruta: "/prestamos" },
     { titulo: "Calculadoras", icon: "📊", ruta: "/simuladores"},
     { titulo: "Historial", icon: "🕑" },
   ];
