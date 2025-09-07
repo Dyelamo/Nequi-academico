@@ -5,7 +5,7 @@ const PrivateRoutes = ({ children }) => {
     const { currentUsuario } = useStoreUsuarios();
 
     if (!currentUsuario) {
-        return <Navigate to="/dashboard" replace />;
+        return <Navigate to="/" replace />;
     }
     return children;
 };
