@@ -1,7 +1,5 @@
-import { supabase } from "./supabase.config";
-import { create } from "zustand";
-
-
+import {supabase} from '../supabase/supabase.config.jsx'
+import {create} from 'zustand'
 
 export const useStorePrestamos = create((set) => ({
     error: null,
@@ -11,24 +9,45 @@ export const useStorePrestamos = create((set) => ({
 
     crearPrestamo: async (prestamo, cuotas = []) => {
         set({ loading: true, error: null });
-        try{
-            const {data: prestamoInsertado, error: errorPrestamo} = await supabase.from("PRESTAMO").insert(prestamo).select().single();
-            if(errorPrestamo) throw errorPrestamo;
+        try {
+        // 1. Insertar préstamo en la tabla PRESTAMO
+            const { data: prestamoInsertado, error: errorPrestamo } = await supabase
+                .from("PRESTAMOS")
+                .insert(prestamo)
+                .select()
+                .single();
 
-            if(cuotas.length > 0){
-                const cuotasCobFk = cuotas.map(c  => ({
-                    ...c,
-                    id_prestamo: prestamoInsertado.id_prestamo
-                }))
-                const { error: errorCuotas } = await supabase.from("CUOTA").insert(cuotasCobFk);
-                if(errorCuotas) throw errorCuotas;
-            }
-            set({ loading: false, error: null });
-            return prestamoInsertado;
-        }catch (error){
-            console.error("Error al crear préstamo:", err)
-            set({ loading: false, error: err.message })
-            throw new Error(err.message)
+            console.log("Préstamo insertado:", prestamoInsertado);
+
+        if (errorPrestamo) throw errorPrestamo;
+
+        // 2. Insertar cuotas ligadas al préstamo
+        if (cuotas.length > 0) {
+            const cuotasConFk = cuotas.map((c) => ({
+            ...c,
+            id_prestamo: prestamoInsertado.id_prestamo, // 👈 FK
+            }));
+
+            const { error: errorCuotas } = await supabase
+            .from("CUOTAS")
+            .insert(cuotasConFk);
+
+            if (errorCuotas) throw errorCuotas;
         }
-    }
-}))
+
+        set((state) => ({
+            loading: false,
+            error: null,
+            prestamos: [prestamoInsertado, ...state.prestamos],
+        }));
+
+        console.log("Préstamo y cuotas creados exitosamente", prestamoInsertado, cuotas);
+
+        return prestamoInsertado;
+        } catch (err) {
+        console.error("Error al crear préstamo:", err);
+        set({ loading: false, error: err.message });
+        throw new Error(err.message);
+        }
+    },
+    }));
