@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
+import PrivateRoutes from "../utils/PrivateToutes";
 
 
 
@@ -17,10 +18,15 @@ const AppRouter = () => {
         <Route path="/register" element={<Register />} /> 
 
         {/* Dashboard principal */}
-        <Route path="/dashboard" element={<Dashboard />} />
-
-      
-
+        <Route>
+          path="/dashboard"
+          element={
+            <PrivateRoutes>
+              <Dashboard />
+            </PrivateRoutes>
+          }
+        </Route>
+        {/* <Route path="/dashboard" element={<Dashboard />} /> */} 
         {/* Ruta no encontrada */}
         <Route path="*" element={<h2>Página no encontrada</h2>} />
       </Routes>

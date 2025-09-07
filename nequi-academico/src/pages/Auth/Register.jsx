@@ -24,6 +24,15 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    // Validar que ningún campo esté vacío
+    for (const key in form) {
+      if (form[key].trim() === "") {
+        alert(`El campo "${key}" no puede estar vacío`);
+        return;
+      }
+    }
+
     if (form.password !== form.confirmPassword) {
       alert("Las contraseñas no coinciden");
       return;
