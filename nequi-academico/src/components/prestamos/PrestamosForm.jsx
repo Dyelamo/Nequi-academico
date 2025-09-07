@@ -15,7 +15,7 @@ import {
 
 const PrestamoForm = () => {
 
-  const { crearPrestamo } = useStorePrestamos();
+  const { crearPrestamo, obtenerPrestamosPorUsuario} = useStorePrestamos();
   const { currentUsuario } = useStoreUsuarios();
 
   const [tipo, setTipo] = useState("FRANCESA"); // FRANCESA, ALEMANA, AMERICANA, SIMPLE
@@ -74,6 +74,18 @@ const PrestamoForm = () => {
     if (!resultado) return alert("Primero calcula la tabla.");
 
     try {
+
+      // Verificar si el usuario ya tiene un préstamo activo o pendiente
+        const prestamosExistentes = await obtenerPrestamosPorUsuario(currentUsuario.id_cuenta);
+
+        const prestamoActivo = prestamosExistentes.find(
+          (p) => p.estado === "PENDIENTE" || p.estado === "ACTIVO"
+        );
+
+        if (prestamoActivo) {
+          return alert("Ya tienes un préstamo en curso. No puedes solicitar otro hasta finalizarlo.");
+        }
+
       // 1. Construir objeto del préstamo
       const prestamo = {
         id_cuenta: currentUsuario.id_cuenta,   // FK a la cuenta
@@ -91,13 +103,10 @@ const PrestamoForm = () => {
       // 2. Construir cuotas a partir de la tabla calculada
       const cuotas = tabla.map((r, i) => {
         const fecha = new Date(prestamo.fecha_solicitud);
-
         // Calcular el intervalo en meses según la frecuencia de pago
         const intervaloMeses = Math.round(12 / (parseInt(formValues.pagosPorAño) || 12));
-
         // Sumar al mes según el número de cuota
         fecha.setMonth(fecha.getMonth() + intervaloMeses * (i + 1));
-
         return {
           numero_cuota: r.periodo,
           fecha_vencimiento: fecha.toISOString().split("T")[0], // YYYY-MM-DD

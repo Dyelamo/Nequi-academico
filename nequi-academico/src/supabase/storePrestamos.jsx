@@ -51,11 +51,29 @@ export const useStorePrestamos = create((set) => ({
         }
     },
 
-    visualizarPrestamos: async () => {
+    obtenerPrestamosPorUsuario: async (id_cuenta) => {
+        set({ loading: true, error: null });
+        try {
+            // 1. Traer préstamos y sus cuotas relacionadas
+            const { data: prestamos, error } = await supabase
+            .from("PRESTAMOS")
+            .select(`
+                *,
+                CUOTAS(*)
+            `)
+            .eq("id_cuenta", id_cuenta); // filtrar por la cuenta del usuario
 
+            if (error) throw error;
+
+            set({ loading: false, prestamos, error: null });
+            console.log("Préstamos obtenidos:", prestamos);
+            return prestamos;
+        } catch (err) {
+            console.error("Error al obtener préstamos:", err);
+            set({ loading: false, error: err.message });
+            throw new Error(err.message);
+        }
     },
 
-    actualiarSaldoCuenta: async (id_cuenta, nuevoSaldo) => {
-        
-    }
+
     }));
