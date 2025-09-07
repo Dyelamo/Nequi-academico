@@ -1,9 +1,16 @@
 // src/pages/Dashboard/Dashboard.jsx
 import React, { useState } from "react";
 import '../../styles/Dashboard.css'
+import { useStoreUsuarios } from "../../supabase/storeUsuarios";
 
 const Dashboard = () => {
-  const [saldo] = useState(1250000);
+  // const [saldo] = useState(1250000);
+  const { currentUsuario } = useStoreUsuarios();
+
+  const saldo = currentUsuario ? currentUsuario.saldo : 0;
+  console.log("Saldo del usuario:", saldo);
+
+console.log("Usuario actual:", currentUsuario);
 
   const accesos = [
     { titulo: "Solicitar Préstamo", icon: "💰" },
@@ -20,7 +27,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <header>
-        <h1>Hola, <span>Usuario Demo</span></h1>
+        <h1>Hola, <span>{currentUsuario?.nombre || "Sin Nombre"}</span></h1>
         <p>Bienvenido a EduBank</p>
       </header>
 
