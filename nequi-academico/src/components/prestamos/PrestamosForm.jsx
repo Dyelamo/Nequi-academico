@@ -88,14 +88,26 @@ const PrestamoForm = () => {
       };
 
       // 2. Construir cuotas a partir de la tabla calculada
-      const cuotas = tabla.map((r) => ({
-        numero_cuota: r.periodo,
-        fecha_vencimiento: new Date().toISOString(), // 👈 puedes calcular fechas reales aquí
-        monto_cuota: r.pago,
-        monto_interes: r.interest,
-        monto_capital: r.principal,
-        estado: "PENDIENTE",
-      }));
+      // 2. Construir cuotas a partir de la tabla calculada
+      const cuotas = tabla.map((r, i) => {
+        const fecha = new Date(prestamo.fecha_solicitud);
+
+        // Calcular el intervalo en meses según la frecuencia de pago
+        const intervaloMeses = Math.round(12 / (parseInt(formValues.pagosPorAño) || 12));
+
+        // Sumar al mes según el número de cuota
+        fecha.setMonth(fecha.getMonth() + intervaloMeses * (i + 1));
+
+        return {
+          numero_cuota: r.periodo,
+          fecha_vencimiento: fecha.toISOString().split("T")[0], // YYYY-MM-DD
+          monto_cuota: r.pago,
+          monto_interes: r.interest,
+          monto_capital: r.principal,
+          estado: "PENDIENTE",
+        };
+      });
+      ;
 
       // 3. Guardar en Supabase
       await crearPrestamo(prestamo, cuotas);

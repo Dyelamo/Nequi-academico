@@ -50,4 +50,12 @@ export const useStorePrestamos = create((set) => ({
         throw new Error(err.message);
         }
     },
+
+    visualizarPrestamos: async () => {
+
+    },
+
+    actualiarSaldoCuenta: async (id_cuenta, nuevoSaldo) => {
+        
+    }
     }));
