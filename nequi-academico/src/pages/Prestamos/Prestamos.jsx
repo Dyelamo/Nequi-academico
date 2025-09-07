@@ -2,11 +2,17 @@
 import React, { useEffect, useState } from "react";
 import PrestamoForm from '../../components/prestamos/PrestamosForm';
 import '../../styles/prestamos.css';
+import  {useStoreUsuarios} from '../../supabase/storeUsuarios';
 
 const STORAGE_KEY = "nequi_academico_prestamos";
 
 const Prestamos = () => {
   const [prestamos, setPrestamos] = useState([]);
+
+
+  const { currentUsuario } = useStoreUsuarios();
+
+  console.log("Usuario actual en Préstamos:", currentUsuario);
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);

@@ -45,55 +45,38 @@ export const useStoreUsuarios = create((set) => ({
         }
     },
 
-    // autenticarUsuario: async (cedula, password) =>  {
-    //     set({loading: true, error: null});
-    //     try{
-    //         const {data, error} = await supabase.from("USUARIO").select().eq("cedula", cedula).single();
-
-    //         if(error) throw error;
-    //         const passwordValida = await bcrypt.compare(password, data.password);
-
-    //         if(!passwordValida){
-    //             throw new Error("Contraseña incorrecta");
-    //         }else{
-    //             set({currentUsuario: data, loading: false, error: null});
-    //         }
-    //     }catch(error){
-    //         set({ error: error.message, loading: false });
-    //         console.error("Error al autenticar el usuario:", error);
-    //         throw new Error(error.message || "No se pudo autenticar el usuario");
-    //     }
-    // }
-
     autenticarUsuario: async (cedula, password) =>  {
         set({loading: true, error: null});
         try {
-            // Traer usuario
             const { data: usuario, error: errorUsuario } = await supabase
-                .from("USUARIO")
-                .select("*, CUENTA(saldo)")
-                .eq("cedula", cedula)
-                .single();
-            console.log("Datos del usuario obtenido:", usuario);
+            .from("USUARIO")
+            .select("*, CUENTA(id_cuenta,saldo)")
+            .eq("cedula", cedula)
+            .single();
+
             if (errorUsuario) throw errorUsuario;
 
             const passwordValida = await bcrypt.compare(password, usuario.password);
-
             if (!passwordValida) {
-                throw new Error("Contraseña incorrecta");
+            throw new Error("Contraseña incorrecta");
             } else {
-                const usuarioConSaldo = {
-                    ...usuario,
-                    saldo: usuario.CUENTA?.[0].saldo ?? 0
-                };
-                delete usuarioConSaldo.CUENTA; // opcional, para limpiar la propiedad anidada
-                set({ currentUsuario: usuarioConSaldo, loading: false, error: null });
+            const cuenta = usuario.CUENTA?.[0]; // 👈 aquí está el id_cuenta
+
+            const usuarioConSaldo = {
+                ...usuario,
+                id_cuenta: cuenta?.id_cuenta ?? null, // 👈 ahora sí lo guardas
+                saldo: cuenta?.saldo ?? 0
+            };
+
+            delete usuarioConSaldo.CUENTA;
+
+            set({ currentUsuario: usuarioConSaldo, loading: false, error: null });
             }
         } catch (error) {
             set({ error: error.message, loading: false });
-            console.error("Error al autenticar el usuario:", error);
             throw new Error(error.message || "No se pudo autenticar el usuario");
         }
-    }
+        }
+
 
 }))

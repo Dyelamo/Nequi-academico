@@ -1,5 +1,9 @@
 // src/components/prestamos/PrestamoForm.jsx
 import React, { useState } from "react";
+import { useStoreUsuarios } from "../../supabase/storeUsuarios";
+import { useStorePrestamos } from "../../supabase/storePrestamos";
+
+
 import {
   scheduleSimple,
   scheduleFrances,
@@ -9,7 +13,11 @@ import {
  // tasaPorPeriodo,
 } from '../../utils/prestamos';
 
-const PrestamoForm = ({ onSave }) => {
+const PrestamoForm = () => {
+
+  const { crearPrestamo, obtenerPrestamosPorUsuario} = useStorePrestamos();
+  const { currentUsuario } = useStoreUsuarios();
+
   const [tipo, setTipo] = useState("FRANCESA"); // FRANCESA, ALEMANA, AMERICANA, SIMPLE
   const [formValues, setFormValues] = useState({});
   const [resultado, setResultado] = useState(null);
@@ -62,40 +70,64 @@ const PrestamoForm = ({ onSave }) => {
     setTabla(schedule);
   };
 
-  const solicitar = () => {
+  const solicitar = async () => {
     if (!resultado) return alert("Primero calcula la tabla.");
-    // Construir objeto de préstamo
-    const prestamo = {
-      id: "P-" + Date.now(),
-      tipo,
-      monto: parseFloat(formValues.monto) || 0,
-      tasa: parseFloat(formValues.tasa) || 0,
-      unidadTasa: formValues.unidadTasa || "anual",
-      pagosPorAño: parseInt(formValues.pagosPorAño || 12),
-      tiempo: {
-        años: parseFloat(formValues.años) || 0,
-        meses: parseFloat(formValues.meses) || 0,
-        días: parseFloat(formValues.dias) || 0,
-      },
-      tabla,
-      resumen: {
-        totalPayment: resultado.totalPayment || null,
-        totalInterest: resultado.totalInterest || null,
-        pagoPeriodico: resultado.pagoPeriodico || resultado.pagoPeriodicoFirst || null,
-        n: resultado.n || null,
-      },
-      estado: "PENDIENTE",
-      fechaSolicitud: new Date().toLocaleString(),
-    };
 
-    // enviar al handler padre (que guarda en localStorage)
-    onSave(prestamo);
+    try {
 
-    // limpiar UI
-    setFormValues({});
-    setResultado(null);
-    setTabla([]);
-    alert("Solicitud creada (simulada) ✅");
+      // Verificar si el usuario ya tiene un préstamo activo o pendiente
+        const prestamosExistentes = await obtenerPrestamosPorUsuario(currentUsuario.id_cuenta);
+
+        const prestamoActivo = prestamosExistentes.find(
+          (p) => p.estado === "PENDIENTE" || p.estado === "ACTIVO"
+        );
+
+        if (prestamoActivo) {
+          return alert("Ya tienes un préstamo en curso. No puedes solicitar otro hasta finalizarlo.");
+        }
+
+      // 1. Construir objeto del préstamo
+      const prestamo = {
+        id_cuenta: currentUsuario.id_cuenta,   // FK a la cuenta
+        monto: parseFloat(formValues.monto) || 0,
+        tasa_interes: parseFloat(formValues.tasa) || 0,
+        tipo_prestamo: tipo,
+        plazo_meses: parseFloat(formValues.meses) || 0,
+        plazo_años: parseFloat(formValues.años) || 0,
+        plazo_dias: parseFloat(formValues.dias) || 0,
+        fecha_solicitud: new Date().toISOString().split("T")[0], // 👈 formato DATE en SQL
+        estado: "PENDIENTE",
+      };
+
+      // 2. Construir cuotas a partir de la tabla calculada
+      // 2. Construir cuotas a partir de la tabla calculada
+      const cuotas = tabla.map((r, i) => {
+        const fecha = new Date(prestamo.fecha_solicitud);
+        // Calcular el intervalo en meses según la frecuencia de pago
+        const intervaloMeses = Math.round(12 / (parseInt(formValues.pagosPorAño) || 12));
+        // Sumar al mes según el número de cuota
+        fecha.setMonth(fecha.getMonth() + intervaloMeses * (i + 1));
+        return {
+          numero_cuota: r.periodo,
+          fecha_vencimiento: fecha.toISOString().split("T")[0], // YYYY-MM-DD
+          monto_cuota: r.pago,
+          monto_interes: r.interest,
+          monto_capital: r.principal,
+          estado: "PENDIENTE",
+        };
+      });
+      ;
+
+      // 3. Guardar en Supabase
+      await crearPrestamo(prestamo, cuotas);
+
+      alert("Solicitud enviada ✅");
+      setFormValues({});
+      setResultado(null);
+      setTabla([]);
+    } catch (error) {
+      alert("Error al solicitar préstamo: " + error.message);
+    }
   };
 
   return (
