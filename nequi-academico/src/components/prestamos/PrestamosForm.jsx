@@ -1,81 +1,83 @@
+"use client"
+
 // src/components/prestamos/PrestamoForm.jsx
-import React, { useState } from "react";
+import { useState } from "react"
 import {
   scheduleSimple,
   scheduleFrances,
   scheduleAlemana,
   scheduleAmericana,
   //tiempoEnPeriodos,
- // tasaPorPeriodo,
-} from '../../utils/prestamos';
+  // tasaPorPeriodo,
+} from "../../utils/prestamos"
 
 const PrestamoForm = ({ onSave }) => {
-  const [tipo, setTipo] = useState("FRANCESA"); // FRANCESA, ALEMANA, AMERICANA, SIMPLE
-  const [formValues, setFormValues] = useState({});
-  const [resultado, setResultado] = useState(null);
-  const [tabla, setTabla] = useState([]);
+  const [tipo, setTipo] = useState("FRANCESA") // FRANCESA, ALEMANA, AMERICANA, SIMPLE
+  const [formValues, setFormValues] = useState({})
+  const [resultado, setResultado] = useState(null)
+  const [tabla, setTabla] = useState([])
 
   const pagosPorAñoOptions = [
     { value: 12, label: "Mensual" },
     { value: 1, label: "Anual" },
-  ];
+  ]
 
   const handleChange = (e) => {
-    setFormValues((s) => ({ ...s, [e.target.name]: e.target.value }));
-  };
+    setFormValues((s) => ({ ...s, [e.target.name]: e.target.value }))
+  }
 
   const calcular = (e) => {
-    e?.preventDefault();
-    const monto = parseFloat(formValues.monto) || 0;
-    const tasa = parseFloat(formValues.tasa) || 0;
-    const pagosPorAño = parseInt(formValues.pagosPorAño || 12);
-    const años = parseFloat(formValues.años) || 0;
-    const meses = parseFloat(formValues.meses) || 0;
-    const dias = parseFloat(formValues.dias) || 0;
+    e?.preventDefault()
+    const monto = Number.parseFloat(formValues.monto) || 0
+    const tasa = Number.parseFloat(formValues.tasa) || 0
+    const pagosPorAño = Number.parseInt(formValues.pagosPorAño || 12)
+    const años = Number.parseFloat(formValues.años) || 0
+    const meses = Number.parseFloat(formValues.meses) || 0
+    const dias = Number.parseFloat(formValues.dias) || 0
 
-    const tiempoObj = { años, meses, días: dias };
-    let result;
-    let schedule;
+    const tiempoObj = { años, meses, días: dias }
+    let result
+    let schedule
 
     switch (tipo) {
       case "SIMPLE":
-        result = scheduleSimple(monto, tasa, formValues.unidadTasa || "anual", tiempoObj, pagosPorAño);
-        schedule = result.rows;
-        break;
+        result = scheduleSimple(monto, tasa, formValues.unidadTasa || "anual", tiempoObj, pagosPorAño)
+        schedule = result.rows
+        break
       case "FRANCESA":
-        result = scheduleFrances(monto, tasa, formValues.unidadTasa || "anual", tiempoObj, pagosPorAño);
-        schedule = result.rows;
-        break;
+        result = scheduleFrances(monto, tasa, formValues.unidadTasa || "anual", tiempoObj, pagosPorAño)
+        schedule = result.rows
+        break
       case "ALEMANA":
-        result = scheduleAlemana(monto, tasa, formValues.unidadTasa || "anual", tiempoObj, pagosPorAño);
-        schedule = result.rows;
-        break;
+        result = scheduleAlemana(monto, tasa, formValues.unidadTasa || "anual", tiempoObj, pagosPorAño)
+        schedule = result.rows
+        break
       case "AMERICANA":
-        result = scheduleAmericana(monto, tasa, formValues.unidadTasa || "anual", tiempoObj, pagosPorAño);
-        schedule = result.rows;
-        break;
+        result = scheduleAmericana(monto, tasa, formValues.unidadTasa || "anual", tiempoObj, pagosPorAño)
+        schedule = result.rows
+        break
       default:
-        return;
+        return
     }
 
-    setResultado(result);
-    setTabla(schedule);
-  };
+    setResultado(result)
+    setTabla(schedule)
+  }
 
   const solicitar = () => {
-    if (!resultado) return alert("Primero calcula la tabla.");
+    if (!resultado) return alert("Primero calcula la tabla.")
     // Construir objeto de préstamo
     const prestamo = {
       id: "P-" + Date.now(),
       tipo,
-      monto: parseFloat(formValues.monto) || 0,
-      tasa: parseFloat(formValues.tasa) || 0,
+      monto: Number.parseFloat(formValues.monto) || 0,
+      tasa: Number.parseFloat(formValues.tasa) || 0,
       unidadTasa: formValues.unidadTasa || "anual",
-      pagosPorAño: parseInt(formValues.pagosPorAño || 12),
+      pagosPorAño: Number.parseInt(formValues.pagosPorAño || 12),
       tiempo: {
-        años: parseFloat(formValues.años) || 0,
-        meses: parseFloat(formValues.meses) || 0,
-        días: parseFloat(formValues.dias) || 0,
+        años: Number.parseFloat(formValues.años) || 0,
+        meses: Number.parseFloat(formValues.meses) || 0,
+        días: Number.parseFloat(formValues.dias) || 0,
       },
       tabla,
       resumen: {
@@ -86,17 +88,17 @@ const PrestamoForm = ({ onSave }) => {
       },
       estado: "PENDIENTE",
       fechaSolicitud: new Date().toLocaleString(),
-    };
+    }
 
     // enviar al handler padre (que guarda en localStorage)
-    onSave(prestamo);
+    onSave(prestamo)
 
     // limpiar UI
-    setFormValues({});
-    setResultado(null);
-    setTabla([]);
-    alert("Solicitud creada (simulada) ✅");
-  };
+    setFormValues({})
+    setResultado(null)
+    setTabla([])
+    alert("Solicitud creada (simulada) ✅")
+  }
 
   return (
     <div className="prestamo-form">
@@ -133,7 +135,13 @@ const PrestamoForm = ({ onSave }) => {
           <label>Plazo (años / meses / días)</label>
           <div className="tiempo-inline">
             <input name="años" type="number" placeholder="Años" onChange={handleChange} value={formValues.años || ""} />
-            <input name="meses" type="number" placeholder="Meses" onChange={handleChange} value={formValues.meses || ""} />
+            <input
+              name="meses"
+              type="number"
+              placeholder="Meses"
+              onChange={handleChange}
+              value={formValues.meses || ""}
+            />
             <input name="dias" type="number" placeholder="Días" onChange={handleChange} value={formValues.dias || ""} />
           </div>
         </div>
@@ -142,14 +150,18 @@ const PrestamoForm = ({ onSave }) => {
           <label>Frecuencia de pago</label>
           <select name="pagosPorAño" onChange={handleChange} value={formValues.pagosPorAño || 12}>
             {pagosPorAñoOptions.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
             ))}
           </select>
         </div>
 
         <div className="actions">
           <button type="submit">Calcular tabla</button>
-          <button type="button" onClick={solicitar} className="primary">Solicitar préstamo</button>
+          <button type="button" onClick={solicitar} className="primary">
+            Solicitar préstamo
+          </button>
         </div>
       </form>
 
@@ -171,7 +183,11 @@ const PrestamoForm = ({ onSave }) => {
           <table>
             <thead>
               <tr>
-                <th>#</th><th>Pago</th><th>Interés</th><th>Capital</th><th>Balance</th>
+                <th>#</th>
+                <th>Pago</th>
+                <th>Interés</th>
+                <th>Capital</th>
+                <th>Balance</th>
               </tr>
             </thead>
             <tbody>
@@ -189,7 +205,7 @@ const PrestamoForm = ({ onSave }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default PrestamoForm;
+export default PrestamoForm

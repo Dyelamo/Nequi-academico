@@ -1,31 +1,33 @@
+"use client"
+
 // src/pages/Auth/Login.jsx
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import '../../styles/Login.css';
-import { useStoreUsuarios } from '../../supabase/storeUsuarios.jsx';
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import "../../styles/Login.css"
+import { useStoreUsuarios } from "../../supabase/storeUsuarios.jsx"
 
 const Login = () => {
-  const [cedula, setCedula] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [cedula, setCedula] = useState("")
+  const [password, setPassword] = useState("")
+  const navigate = useNavigate()
 
-  const { autenticarUsuario, loading, error } = useStoreUsuarios();
+  const { autenticarUsuario, loading } = useStoreUsuarios()
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    if(!cedula || !password){
-      alert("Por favor, completa todos los campos");
-      return;
+    e.preventDefault()
+    if (!cedula || !password) {
+      alert("Por favor, completa todos los campos")
+      return
     }
 
-    try{
-      await autenticarUsuario(cedula, password);
-      alert("Inicio de sesión exitoso");
-      navigate("/dashboard");
-    }catch(error){
-      alert("Error al iniciar sesión: " + error.message);
+    try {
+      await autenticarUsuario(cedula, password)
+      alert("Inicio de sesión exitoso")
+      navigate("/dashboard")
+    } catch (error) {
+      alert("Error al iniciar sesión: " + error.message)
     }
-  };
+  }
 
   return (
     <div className="login-container">
@@ -35,12 +37,7 @@ const Login = () => {
         <p className="login-subtitle">Accede a tu cuenta EduBank</p>
 
         <label>Cédula</label>
-        <input
-          type="text"
-          value={cedula}
-          onChange={(e) => setCedula(e.target.value)}
-          placeholder="Ingresa tu cédula"
-        />
+        <input type="text" value={cedula} onChange={(e) => setCedula(e.target.value)} placeholder="Ingresa tu cédula" />
 
         <label>Contraseña</label>
         <input
@@ -50,7 +47,9 @@ const Login = () => {
           placeholder="Ingresa tu contraseña"
         />
 
-        <button type="submit">Ingresar</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Ingresando..." : "Ingresar"}
+        </button>
 
         <div className="login-links">
           <a href="#">¿Olvidaste tu contraseña?</a>
@@ -60,7 +59,7 @@ const Login = () => {
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

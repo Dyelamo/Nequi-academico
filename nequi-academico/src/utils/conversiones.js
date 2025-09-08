@@ -1,38 +1,52 @@
-// src/utils/conversiones.js
+// Utilidades para conversiones de tiempo y formateo
+// Configuración global de decimales
+export const DECIMALES_CONFIG = {
+  MONEDA: 2, // Para montos en pesos
+  PORCENTAJE: 2, // Para tasas de interés
+  TIEMPO: 2, // Para cálculos de tiempo
+  RESULTADOS: 2, // Para resultados generales
+}
 
-// 🔹 Convierte tasas y tiempos a base mensual para consistencia
-export const normalizarTasaYTiempo = (tasa, unidadTasa, tiempo, unidadTiempo) => {
-  let tasaMensual = parseFloat(tasa) || 0;
-  let tiempoMeses = parseFloat(tiempo) || 0;
+export const calcularTiempoEnMeses = (años = 0, meses = 0, días = 0) => {
+  const añosEnMeses = Number.parseFloat(años) * 12 || 0
+  const mesesDirectos = Number.parseFloat(meses) || 0
+  const díasEnMeses = (Number.parseFloat(días) || 0) / 30
 
-  // Convertir tasa a mensual
-  switch (unidadTasa) {
-    case "anual":
-      tasaMensual = tasaMensual / 12;
-      break;
-    case "trimestral":
-      tasaMensual = tasaMensual / 3;
-      break;
-    case "mensual":
-      break;
-    case "diaria":
-      tasaMensual = tasaMensual * 30; // aprox
-      break;
-    default:
+  return añosEnMeses + mesesDirectos + díasEnMeses
+}
+
+export const formatearTiempo = (años = 0, meses = 0, días = 0) => {
+  const partes = []
+
+  if (años && Number.parseFloat(años) > 0) {
+    partes.push(`${años} año${años > 1 ? "s" : ""}`)
   }
 
-  // Convertir tiempo a meses
-  switch (unidadTiempo) {
-    case "años":
-      tiempoMeses = tiempoMeses * 12;
-      break;
-    case "meses":
-      break;
-    case "días":
-      tiempoMeses = tiempoMeses / 30;
-      break;
-    default:
+  if (meses && Number.parseFloat(meses) > 0) {
+    partes.push(`${meses} mes${meses > 1 ? "es" : ""}`)
   }
 
-  return { tasaMensual, tiempoMeses };
-};
+  if (días && Number.parseFloat(días) > 0) {
+    partes.push(`${días} día${días > 1 ? "s" : ""}`)
+  }
+
+  return partes.length > 0 ? partes.join(", ") : "0 días"
+}
+
+export const formatearMoneda = (valor) => {
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: DECIMALES_CONFIG.MONEDA,
+  }).format(valor)
+}
+
+export const formatearPorcentaje = (valor, decimales = DECIMALES_CONFIG.PORCENTAJE) => {
+  return `${valor.toFixed(decimales)}%`
+}
+
+export const formatearNumero = (valor, tipo = "RESULTADOS") => {
+  const decimales = DECIMALES_CONFIG[tipo] || DECIMALES_CONFIG.RESULTADOS
+  return Number(valor).toFixed(decimales)
+}

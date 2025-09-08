@@ -1,35 +1,37 @@
-// src/pages/Prestamos/Prestamos.jsx
-import React, { useEffect, useState } from "react";
-import PrestamoForm from '../../components/prestamos/PrestamosForm';
-import '../../styles/prestamos.css';
+"use client"
 
-const STORAGE_KEY = "nequi_academico_prestamos";
+// src/pages/Prestamos/Prestamos.jsx
+import { useEffect, useState } from "react"
+import PrestamoForm from "../../components/prestamos/PrestamosForm"
+import "../../styles/prestamos.css"
+
+const STORAGE_KEY = "nequi_academico_prestamos"
 
 const Prestamos = () => {
-  const [prestamos, setPrestamos] = useState([]);
+  const [prestamos, setPrestamos] = useState([])
 
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) setPrestamos(JSON.parse(raw));
-  }, []);
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) setPrestamos(JSON.parse(raw))
+  }, [])
 
   const guardarPrestamo = (p) => {
-    const nuevo = [p, ...prestamos];
-    setPrestamos(nuevo);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nuevo));
-  };
+    const nuevo = [p, ...prestamos]
+    setPrestamos(nuevo)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nuevo))
+  }
 
   const aprobar = (id) => {
-    const updated = prestamos.map((p) => p.id === id ? { ...p, estado: "APROBADO" } : p);
-    setPrestamos(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  };
+    const updated = prestamos.map((p) => (p.id === id ? { ...p, estado: "APROBADO" } : p))
+    setPrestamos(updated)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+  }
 
   const rechazar = (id) => {
-    const updated = prestamos.map((p) => p.id === id ? { ...p, estado: "RECHAZADO" } : p);
-    setPrestamos(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  };
+    const updated = prestamos.map((p) => (p.id === id ? { ...p, estado: "RECHAZADO" } : p))
+    setPrestamos(updated)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+  }
 
   return (
     <div className="prestamos-page">
@@ -50,11 +52,17 @@ const Prestamos = () => {
                   <span>{p.estado}</span>
                 </div>
                 <p>Monto: {p.monto.toFixed(2)}</p>
-                <p>Tasa: {p.tasa}% ({p.unidadTasa})</p>
-                <p>Plazo: {p.tiempo.años}a {p.tiempo.meses}m {p.tiempo.días}d</p>
+                <p>
+                  Tasa: {p.tasa}% ({p.unidadTasa})
+                </p>
+                <p>
+                  Plazo: {p.tiempo.años}a {p.tiempo.meses}m {p.tiempo.días}d
+                </p>
                 <div className="card-actions">
                   <button onClick={() => aprobar(p.id)}>Aprobar</button>
-                  <button onClick={() => rechazar(p.id)} className="danger">Rechazar</button>
+                  <button onClick={() => rechazar(p.id)} className="danger">
+                    Rechazar
+                  </button>
                 </div>
               </div>
             ))
@@ -62,7 +70,7 @@ const Prestamos = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Prestamos;
+export default Prestamos

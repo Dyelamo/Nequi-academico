@@ -1,76 +1,402 @@
+/* Replacing all styles with elegant design using semantic tokens */
+
+/* Contenedor principal del registro */
 .register-container {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: var(--muted);
+  justify-content: center;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Elementos decorativos de fondo */
+.register-container::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
+  animation: float 22s ease-in-out infinite;
+}
+
+.register-container::after {
+  content: "";
+  position: absolute;
+  bottom: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 50%);
+  animation: float 28s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(40px, -40px) rotate(120deg);
+  }
+  66% {
+    transform: translate(-30px, 30px) rotate(240deg);
+  }
+}
+
+/* Tarjeta del formulario de registro */
 .register-card {
-  background: var(--card);
-  color: var(--card-foreground);
-  padding: 2rem;
-  border-radius: var(--radius);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  background: white;
+  backdrop-filter: blur(20px);
+  padding: 48px;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
   width: 100%;
-  max-width: 380px;
+  max-width: 480px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  position: relative;
+  z-index: 10;
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Logo/Icono del registro */
 .register-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 20px;
   display: flex;
-  justify-content: center;
-  font-size: 2rem;
-  background: var(--secondary);
-  color: var(--secondary-foreground);
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  margin: 0 auto 1rem auto;
   align-items: center;
+  justify-content: center;
+  margin: 0 auto 32px;
+  font-size: 36px;
+  color: white;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+  animation: pulse 2s ease-in-out infinite;
 }
 
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Título principal */
 .register-card h2 {
-  text-align: center;
-  margin-bottom: 0.5rem;
+  color: #1e293b;
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
+/* Subtítulo */
 .register-subtitle {
-  text-align: center;
-  color: var(--muted-foreground);
-  margin-bottom: 1.5rem;
+  color: #64748b;
+  font-size: 16px;
+  margin: 0 0 40px 0;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
+/* Grid de inputs para mejor organización */
+.register-form {
+  display: grid;
+  gap: 20px;
+  text-align: left;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Labels */
+.register-card label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+/* Inputs */
 .register-card input {
   width: 100%;
-  padding: 0.7rem;
-  margin-bottom: 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  outline: none;
+  padding: 16px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 16px;
+  color: #374151;
+  background: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
 .register-card input:focus {
-  border-color: var(--primary);
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  background: #f8fafc;
+  transform: translateY(-2px);
 }
 
+.register-card input::placeholder {
+  color: #64748b;
+  font-weight: 400;
+}
+
+/* Inputs específicos por tipo */
+.register-card input[type="email"] {
+  text-transform: lowercase;
+}
+
+.register-card input[name="cedula"] {
+  letter-spacing: 0.5px;
+  font-family: "Courier New", monospace;
+}
+
+/* Botón principal */
 .register-card button {
   width: 100%;
-  padding: 0.8rem;
-  background: var(--primary);
-  color: var(--primary-foreground);
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
   border: none;
-  border-radius: var(--radius);
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
-  font-weight: bold;
-  transition: opacity 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 24px 0 32px 0;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+  grid-column: 1 / -1;
 }
 
-.register-card button:hover {
-  opacity: 0.9;
+.register-card button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
 }
 
+.register-card button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+}
+
+.register-card button:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.register-card button:active:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.register-card button:disabled {
+  background: #64748b;
+  color: #f1f5f9;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Enlaces del registro */
 .register-links {
-  margin-top: 1rem;
   text-align: center;
-  font-size: 0.85rem;
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.register-links a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.register-links a::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 50%;
+  background: #3b82f6;
+  transition: all 0.3s ease;
+}
+
+.register-links a:hover {
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.register-links a:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .input-row {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    padding: 16px;
+  }
+
+  .register-card {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+
+  .register-card h2 {
+    font-size: 28px;
+  }
+
+  .register-subtitle {
+    font-size: 15px;
+  }
+
+  .register-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+
+  .register-card input {
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+}
+
+/* Estados de validación */
+.register-card input.error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+  animation: shake 0.5s ease-in-out;
+}
+
+.register-card input.success {
+  border-color: #059669;
+  box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Indicador de fortaleza de contraseña */
+.password-strength {
+  margin-top: 8px;
+  text-align: left;
+}
+
+.password-strength-bar {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.password-strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 3px;
+}
+
+.password-strength-fill.weak {
+  width: 33%;
+  background: linear-gradient(90deg, #dc2626, #f87171);
+}
+
+.password-strength-fill.medium {
+  width: 66%;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.password-strength-fill.strong {
+  width: 100%;
+  background: linear-gradient(90deg, #059669, #34d399);
+}
+
+.password-strength-text {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Efectos adicionales */
+.register-card input:hover:not(:focus) {
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+}
+
+/* Modo oscuro mejorado */
+@media (prefers-color-scheme: dark) {
+  .register-container {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  }
+
+  .register-card {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
 }
