@@ -5,6 +5,7 @@ import Register from "../pages/Auth/Register";
 import Simuladores from "../pages/Simuladores/Simuladores";
 import  Prestamos  from "../pages/Prestamos/Prestamos";
 import PrivateRoutes from "../utils/PrivateToutes";
+import HistorialPrestamos from "../pages/Historial/HistorialPrestamos";
 
 const AppRouter = () => {
   return (
@@ -26,6 +27,8 @@ const AppRouter = () => {
 
         <Route path="/simuladores" element={<Simuladores />} />
         <Route path="/prestamos" element={<Prestamos />} />
+        <Route path="/historial-prestamos" element={<HistorialPrestamos />} />
+
 
       </Routes>
     </BrowserRouter>

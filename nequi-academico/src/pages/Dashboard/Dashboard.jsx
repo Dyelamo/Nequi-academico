@@ -16,7 +16,7 @@ const Dashboard = () => {
   const accesos = [
     { titulo: "Solicitar Préstamo", icon: "💰", ruta: "/prestamos" },
     { titulo: "Calculadoras", icon: "📊", ruta: "/simuladores" },
-    { titulo: "Historial", icon: "🕑" },
+    { titulo: "Historial", icon: "🕑", ruta:"/historial-prestamos"},
   ]
 
   const transacciones = [
