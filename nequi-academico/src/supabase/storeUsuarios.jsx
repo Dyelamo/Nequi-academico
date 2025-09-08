@@ -10,6 +10,8 @@ export const useStoreUsuarios = create((set) => ({
     currentUsuario: null,
     usuarios: [],
 
+    setUsuario: (usuario) => set({currentUsuario: usuario}),
+
     crearUsuario: async (nuevoUsuario) => {
         set({loading: true, error: null});
 
@@ -76,7 +78,35 @@ export const useStoreUsuarios = create((set) => ({
             set({ error: error.message, loading: false });
             throw new Error(error.message || "No se pudo autenticar el usuario");
         }
+        },
+    
+
+    fetchUsuario: async (id_cuenta) => {
+        set({ loading: true, error: null });
+        try {
+            const { data, error } = await supabase
+                .from("CUENTA")
+                .select("*")
+                .eq("id_cuenta", id_cuenta)
+                .single();
+
+            if (error) throw error;
+
+            set((state) => ({
+                currentUsuario: {
+                ...state.currentUsuario,
+                saldo: data.saldo, // ✅ actualiza el saldo
+                },
+                loading: false,
+            }));
+
+            return data;
+        } catch (err) {
+            console.error("❌ Error al refrescar usuario:", err);
+            set({ loading: false, error: err.message });
+            return null;
         }
+    },
 
 
 }))

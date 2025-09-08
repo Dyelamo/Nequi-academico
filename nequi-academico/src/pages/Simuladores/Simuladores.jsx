@@ -7,6 +7,7 @@ import HistorialCalculos from "../../components/simuladores/HistorialCalculos"
 import InteresCompuesto from '../../components/simuladores/InteresCompuestos'
 import Anualidades from "../../components/simuladores/Anualidades"
 import TasaInteres from "../../components/simuladores/TasaInteres"
+import { useNavigate } from "react-router-dom"
 
 const Simuladores = () => {
   const [tab, setTab] = useState("simple")
@@ -21,9 +22,19 @@ const Simuladores = () => {
     localStorage.setItem("historial_calculos_financieros", JSON.stringify(nuevoHistorial))
   }
 
+  const navigate = useNavigate();
+
   return (
     <div className="simuladores-container">
       <div className="simuladores-header">
+
+        <button
+                className="btn-volver"
+                onClick={() => navigate("/dashboard")}
+            >
+                ←
+        </button>
+
         <h1>Simuladores Financieros</h1>
         <p>Herramientas para cálculos de interés, anualidades y tasas</p>
       </div>
