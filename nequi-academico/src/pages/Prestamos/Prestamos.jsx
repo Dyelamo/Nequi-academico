@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react"
 import PrestamoForm from "../../components/prestamos/PrestamosForm"
 import "../../styles/prestamos.css"
+import { useNavigate } from "react-router-dom"
 
 const STORAGE_KEY = "nequi_academico_prestamos"
 
@@ -33,8 +34,18 @@ const Prestamos = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
   }
 
+  const navigate = useNavigate()
+
   return (
     <div className="prestamos-page">
+
+      <button
+                className="btn-volver"
+                onClick={() => navigate("/dashboard")}
+            >
+                ←
+      </button>
+      
       <h1>Préstamos</h1>
       <div className="grid">
         <div className="left">
