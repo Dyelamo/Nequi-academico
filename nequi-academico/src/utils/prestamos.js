@@ -1,136 +1,228 @@
-// src/utils/prestamoUtils.js
-// Helpers para normalizar tasas, tiempos y generar tablas de amortización.
+// src/utils/prestamos.js
+// Utilidades para cálculos de préstamos y amortización
 
-export const toNumber = (v) => {
-  const n = parseFloat(v);
-  return Number.isFinite(n) ? n : 0;
-};
+/**
+ * Convierte tiempo en diferentes unidades a períodos totales
+ */
+export function tiempoEnPeriodos(tiempo, pagosPorAño) {
+  const { años = 0, meses = 0, días = 0 } = tiempo
 
-// convierte tiempo (años, meses, días) a número de periodos (según pagosPorAño)
-export const tiempoEnPeriodos = ({ años = 0, meses = 0, días = 0 }, pagosPorAño) => {
-  // transformar todo a años decimales
-  const years = toNumber(años) + toNumber(meses) / 12 + toNumber(días) / 365;
-  return years * pagosPorAño;
-};
+  // Convertir todo a años decimales
+  const añosDecimales = años + meses / 12 + días / 365
 
-// convierte la tasa indicada (en su unidad) a tasa efectiva por periodo (decimal)
-// ej: si tasa=12, unidadTasa='anual', pagosPorAño=12 -> devuelva 0.01 (1% por mes)
-export const tasaPorPeriodo = (tasa, unidadTasa, pagosPorAño) => {
-  const t = toNumber(tasa);
-  // aproximación: llevar a tasa anual equivalente (nominal simple)
-  let anual = 0;
+  // Convertir a períodos según la frecuencia de pago
+  return Math.round(añosDecimales * pagosPorAño)
+}
+
+/**
+ * Convierte tasa de diferentes unidades a tasa por período
+ */
+export function tasaPorPeriodo(tasa, unidadTasa, pagosPorAño) {
+  let tasaAnual = tasa / 100 // Convertir porcentaje a decimal
+
+  // Convertir a tasa anual si no lo es
   switch (unidadTasa) {
-    case "anual":
-      anual = t;
-      break;
     case "mensual":
-      anual = t * 12;
-      break;
+      tasaAnual = tasaAnual * 12
+      break
     case "trimestral":
-      anual = t * 4;
-      break;
+      tasaAnual = tasaAnual * 4
+      break
     case "diaria":
-      anual = t * 365;
-      break;
+      tasaAnual = tasaAnual * 365
+      break
+    case "anual":
     default:
-      anual = t;
+      // Ya está en anual
+      break
   }
-  return (anual / 100) / pagosPorAño; // decimal por periodo
-};
 
-// === CALCULADORES DE TABLAS ===
-
-// 1) Simple interest loan -> equal installments of (capital + totalInterest)/nPeriods
-export function scheduleSimple(capital, tasa, unidadTasa, añosObj, pagosPorAño) {
-  const n = Math.round(tiempoEnPeriodos(añosObj, pagosPorAño));
-  const i_period = tasaPorPeriodo(tasa, unidadTasa, pagosPorAño);
-  // total interest using annual-equivalent approach:
-  const totalInterest = capital * (i_period * n);
-  const pago = (capital + totalInterest) / (n || 1);
-  const rows = [];
-  let balance = capital;
-  for (let k = 1; k <= Math.max(1, n); k++) {
-    const interest = capital * i_period; // simple interest uses original capital each period
-    const principal = pago - interest;
-    balance = Math.max(0, balance - principal);
-    rows.push({
-      periodo: k,
-      pago: +pago,
-      interest: +interest,
-      principal: +principal,
-      balance: +balance,
-    });
-  }
-  return { rows, totalPayment: pago * n, totalInterest, pagoPeriodico: pago, n };
+  // Convertir a tasa por período
+  return tasaAnual / pagosPorAño
 }
 
-// 2) French (Anualidad) -> equal payment A = C * i / (1-(1+i)^-n)
-export function scheduleFrances(capital, tasa, unidadTasa, añosObj, pagosPorAño) {
-  const n = Math.round(tiempoEnPeriodos(añosObj, pagosPorAño));
-  const i = tasaPorPeriodo(tasa, unidadTasa, pagosPorAño);
-  const rows = [];
-  const A = i === 0 ? capital / (n || 1) : capital * (i / (1 - Math.pow(1 + i, -n || 1)));
-  let balance = capital;
-  let totalInterest = 0;
-  for (let k = 1; k <= Math.max(1, n); k++) {
-    const interest = balance * i;
-    const principal = A - interest;
-    balance = Math.max(0, balance - principal);
-    totalInterest += interest;
+/**
+ * Amortización con interés simple
+ */
+export function scheduleSimple(monto, tasa, unidadTasa, tiempo, pagosPorAño) {
+  const n = tiempoEnPeriodos(tiempo, pagosPorAño)
+  const tasaPeriodo = tasaPorPeriodo(tasa, unidadTasa, pagosPorAño)
+
+  const interesTotal = monto * tasaPeriodo * n
+  const totalPagar = monto + interesTotal
+  const pagoPeriodico = totalPagar / n
+
+  const rows = []
+  let balance = monto
+
+  for (let i = 1; i <= n; i++) {
+    const interesPeriodo = monto * tasaPeriodo
+    const capitalPeriodo = pagoPeriodico - interesPeriodo
+    balance -= capitalPeriodo
+
     rows.push({
-      periodo: k,
-      pago: +A,
-      interest: +interest,
-      principal: +principal,
-      balance: +balance,
-    });
+      periodo: i,
+      pago: pagoPeriodico,
+      interest: interesPeriodo,
+      principal: capitalPeriodo,
+      balance: Math.max(0, balance),
+    })
   }
-  return { rows, totalPayment: A * n, totalInterest, pagoPeriodico: A, n };
+
+  return {
+    rows,
+    n,
+    pagoPeriodico,
+    totalPayment: totalPagar,
+    totalInterest: interesTotal,
+  }
 }
 
-// 3) German (Alemana) -> principal constant, interest on remaining balance
-export function scheduleAlemana(capital, tasa, unidadTasa, añosObj, pagosPorAño) {
-  const n = Math.round(tiempoEnPeriodos(añosObj, pagosPorAño));
-  const i = tasaPorPeriodo(tasa, unidadTasa, pagosPorAño);
-  const rows = [];
-  const principalConst = capital / (n || 1);
-  let balance = capital;
-  let totalInterest = 0;
-  for (let k = 1; k <= Math.max(1, n); k++) {
-    const interest = balance * i;
-    const pago = principalConst + interest;
-    balance = Math.max(0, balance - principalConst);
-    totalInterest += interest;
-    rows.push({
-      periodo: k,
-      pago: +pago,
-      interest: +interest,
-      principal: +principalConst,
-      balance: +balance,
-    });
+/**
+ * Amortización francesa (cuota constante)
+ */
+export function scheduleFrances(monto, tasa, unidadTasa, tiempo, pagosPorAño) {
+  const n = tiempoEnPeriodos(tiempo, pagosPorAño)
+  const tasaPeriodo = tasaPorPeriodo(tasa, unidadTasa, pagosPorAño)
+
+  if (tasaPeriodo === 0) {
+    // Sin interés, solo dividir el capital
+    const pagoPeriodico = monto / n
+    const rows = []
+    let balance = monto
+
+    for (let i = 1; i <= n; i++) {
+      balance -= pagoPeriodico
+      rows.push({
+        periodo: i,
+        pago: pagoPeriodico,
+        interest: 0,
+        principal: pagoPeriodico,
+        balance: Math.max(0, balance),
+      })
+    }
+
+    return {
+      rows,
+      n,
+      pagoPeriodico,
+      totalPayment: monto,
+      totalInterest: 0,
+    }
   }
-  return { rows, totalPayment: (capital + totalInterest), totalInterest, pagoPeriodicoFirst: rows[0]?.pago || 0, n };
+
+  // Fórmula de cuota constante
+  const pagoPeriodico = (monto * (tasaPeriodo * Math.pow(1 + tasaPeriodo, n))) / (Math.pow(1 + tasaPeriodo, n) - 1)
+
+  const rows = []
+  let balance = monto
+  let totalInterest = 0
+
+  for (let i = 1; i <= n; i++) {
+    const interesPeriodo = balance * tasaPeriodo
+    const capitalPeriodo = pagoPeriodico - interesPeriodo
+    balance -= capitalPeriodo
+    totalInterest += interesPeriodo
+
+    rows.push({
+      periodo: i,
+      pago: pagoPeriodico,
+      interest: interesPeriodo,
+      principal: capitalPeriodo,
+      balance: Math.max(0, balance),
+    })
+  }
+
+  return {
+    rows,
+    n,
+    pagoPeriodico,
+    totalPayment: pagoPeriodico * n,
+    totalInterest,
+  }
 }
 
-// 4) Americana (bullet) -> interest periodic, principal al final
-export function scheduleAmericana(capital, tasa, unidadTasa, añosObj, pagosPorAño) {
-  const n = Math.round(tiempoEnPeriodos(añosObj, pagosPorAño));
-  const i = tasaPorPeriodo(tasa, unidadTasa, pagosPorAño);
-  const rows = [];
-  let totalInterest = 0;
-  for (let k = 1; k <= Math.max(1, n); k++) {
-    const interest = capital * i;
-    const principal = k === n ? capital : 0;
-    const pago = interest + principal;
-    totalInterest += interest;
-    const balance = k === n ? 0 : capital;
+/**
+ * Amortización alemana (capital constante)
+ */
+export function scheduleAlemana(monto, tasa, unidadTasa, tiempo, pagosPorAño) {
+  const n = tiempoEnPeriodos(tiempo, pagosPorAño)
+  const tasaPeriodo = tasaPorPeriodo(tasa, unidadTasa, pagosPorAño)
+
+  const capitalPeriodo = monto / n
+
+  const rows = []
+  let balance = monto
+  let totalInterest = 0
+  let totalPayment = 0
+
+  for (let i = 1; i <= n; i++) {
+    const interesPeriodo = balance * tasaPeriodo
+    const pagoPeriodico = capitalPeriodo + interesPeriodo
+    balance -= capitalPeriodo
+    totalInterest += interesPeriodo
+    totalPayment += pagoPeriodico
+
     rows.push({
-      periodo: k,
-      pago: +pago,
-      interest: +interest,
-      principal: +principal,
-      balance: +balance,
-    });
+      periodo: i,
+      pago: pagoPeriodico,
+      interest: interesPeriodo,
+      principal: capitalPeriodo,
+      balance: Math.max(0, balance),
+    })
   }
-  return { rows, totalPayment: capital + totalInterest, totalInterest, n };
+
+  return {
+    rows,
+    n,
+    pagoPeriodicoFirst: rows[0]?.pago || 0,
+    totalPayment,
+    totalInterest,
+  }
+}
+
+/**
+ * Amortización americana (bullet payment)
+ */
+export function scheduleAmericana(monto, tasa, unidadTasa, tiempo, pagosPorAño) {
+  const n = tiempoEnPeriodos(tiempo, pagosPorAño)
+  const tasaPeriodo = tasaPorPeriodo(tasa, unidadTasa, pagosPorAño)
+
+  const interesPeriodo = monto * tasaPeriodo
+
+  const rows = []
+  let totalInterest = 0
+
+  // Períodos 1 a n-1: solo pago de intereses
+  for (let i = 1; i < n; i++) {
+    totalInterest += interesPeriodo
+    rows.push({
+      periodo: i,
+      pago: interesPeriodo,
+      interest: interesPeriodo,
+      principal: 0,
+      balance: monto,
+    })
+  }
+
+  // Último período: interés + capital completo
+  const pagoFinal = interesPeriodo + monto
+  totalInterest += interesPeriodo
+
+  rows.push({
+    periodo: n,
+    pago: pagoFinal,
+    interest: interesPeriodo,
+    principal: monto,
+    balance: 0,
+  })
+
+  return {
+    rows,
+    n,
+    pagoPeriodico: interesPeriodo, // Pago regular (solo intereses)
+    pagoFinal,
+    totalPayment: totalInterest + monto,
+    totalInterest,
+  }
 }

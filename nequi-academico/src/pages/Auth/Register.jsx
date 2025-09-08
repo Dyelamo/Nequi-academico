@@ -1,9 +1,10 @@
-// src/pages/Auth/Register.jsx
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import '../../styles/Register.css';
-import { useStoreUsuarios } from "../../supabase/storeUsuarios";
+"use client"
 
+// src/pages/Auth/Register.jsx
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import "../../styles/Register.css"
+import { useStoreUsuarios } from "../../supabase/storeUsuarios"
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -13,46 +14,44 @@ const Register = () => {
     telefono: "",
     password: "",
     confirmPassword: "",
-  });
+  })
 
-  const { crearUsuario, loading, error } = useStoreUsuarios();
+  const { crearUsuario, loading} = useStoreUsuarios()
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleRegister = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
     // Validar que ningún campo esté vacío
     for (const key in form) {
       if (form[key].trim() === "") {
-        alert(`El campo "${key}" no puede estar vacío`);
-        return;
+        alert(`El campo "${key}" no puede estar vacío`)
+        return
       }
     }
 
     if (form.password !== form.confirmPassword) {
-      alert("Las contraseñas no coinciden");
-      return;
+      alert("Las contraseñas no coinciden")
+      return
     }
 
-
-    try{
+    try {
       await crearUsuario({
         cedula: form.cedula,
         nombre: form.nombre,
         correo: form.correo,
         telefono: form.telefono,
-        password: form.password
-      });
-      alert("Usuario creado exitosamente");
-      navigate("/");
-    }catch(error){
-      alert("Error al crear usuario: " + error.message);
+        password: form.password,
+      })
+      alert("Usuario creado exitosamente")
+      navigate("/")
+    } catch (error) {
+      alert("Error al crear usuario: " + error.message)
     }
-  };
+  }
 
   return (
     <div className="register-container">
@@ -61,18 +60,8 @@ const Register = () => {
         <h2>Crear Cuenta</h2>
         <p className="register-subtitle">Únete a EduBank</p>
 
-        <input
-          name="cedula"
-          placeholder="Número de Cédula"
-          value={form.cedula}
-          onChange={handleChange}
-        />
-        <input
-          name="nombre"
-          placeholder="Nombre Completo"
-          value={form.nombre}
-          onChange={handleChange}
-        />
+        <input name="cedula" placeholder="Número de Cédula" value={form.cedula} onChange={handleChange} />
+        <input name="nombre" placeholder="Nombre Completo" value={form.nombre} onChange={handleChange} />
         <input
           name="correo"
           placeholder="Correo Electrónico"
@@ -80,19 +69,8 @@ const Register = () => {
           value={form.correo}
           onChange={handleChange}
         />
-        <input
-          name="telefono"
-          placeholder="telefono"
-          value={form.telefono}
-          onChange={handleChange}
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Contraseña"
-          value={form.password}
-          onChange={handleChange}
-        />
+        <input name="telefono" placeholder="Teléfono" value={form.telefono} onChange={handleChange} />
+        <input name="password" type="password" placeholder="Contraseña" value={form.password} onChange={handleChange} />
         <input
           name="confirmPassword"
           type="password"
@@ -101,14 +79,16 @@ const Register = () => {
           onChange={handleChange}
         />
 
-        <button type="submit">Crear Cuenta</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Creando cuenta..." : "Crear Cuenta"}
+        </button>
 
         <p className="register-links">
           ¿Ya tienes cuenta? <Link to="/">Inicia sesión aquí</Link>
         </p>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register

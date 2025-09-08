@@ -1,0 +1,317 @@
+/* Historial de cálculos mejorado */
+.historial {
+  max-width: 100%;
+  padding: 1rem;
+}
+
+.historial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.historial-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.historial-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.total-calculos {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.acciones-historial {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.clear-btn {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clear-btn:hover {
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+/* Estado vacío mejorado */
+.estado-vacio {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 16px;
+  border: 2px dashed var(--border-color);
+}
+
+.icono-vacio {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+}
+
+.estado-vacio h3 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.estado-vacio p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Grid de historial */
+.historial-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+}
+
+/* Tarjetas de historial mejoradas */
+.historial-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.historial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tipo-calculo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.icono {
+  font-size: 2rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.info-tipo h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.modo {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.fecha-calculo .fecha {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.datos-entrada,
+.resultado-section {
+  margin-bottom: 1.5rem;
+}
+
+.datos-entrada h4,
+.resultado-section h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.datos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.dato-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.etiqueta {
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.valor {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.resultado-principal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border-radius: 12px;
+  border: 2px solid var(--success-color);
+  margin-bottom: 1rem;
+}
+
+.resultado-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.resultado-valor {
+  font-weight: 700;
+  color: var(--success-color);
+  font-size: 1.3rem;
+}
+
+.analisis-financiero {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ganancia-item,
+.total-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.ganancia-item {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border-left: 4px solid var(--success-color);
+}
+
+.total-item {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-left: 4px solid var(--primary-color);
+}
+
+.ganancia-label,
+.total-label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.ganancia-valor.positivo {
+  color: var(--success-color);
+  font-weight: 700;
+}
+
+.ganancia-valor.negativo {
+  color: var(--danger-color);
+  font-weight: 700;
+}
+
+.total-valor {
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .historial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .historial-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .card-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .datos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dato-item,
+  .ganancia-item,
+  .total-item,
+  .resultado-principal {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .historial {
+    padding: 0.5rem;
+  }
+
+  .historial-header h2 {
+    font-size: 1.5rem;
+  }
+}
