@@ -14,9 +14,11 @@ const Dashboard = () => {
   console.log("Usuario actual:", currentUsuario)
 
   const accesos = [
+    {titulo: "Recargar Saldo", icon: "💵", ruta: "/recargar-saldo" },
     { titulo: "Solicitar Préstamo", icon: "💰", ruta: "/prestamos" },
     { titulo: "Calculadoras", icon: "📊", ruta: "/simuladores" },
     { titulo: "Historial", icon: "🕑", ruta:"/historial-prestamos"},
+    // { titulo: "Perfil", icon: "👤", ruta: "/perfil" },
   ]
 
   const transacciones = [
