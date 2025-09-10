@@ -108,5 +108,45 @@ export const useStoreUsuarios = create((set) => ({
         }
     },
 
+    obtenerUsuarioConCuenta: async (cedula) => {
+        set({ loading: true, error: null });
+        try {
+        // 1. Buscar usuario por cédula
+        const { data: usuario, error: errorUsuario } = await supabase
+            .from("USUARIO")
+            .select("*")
+            .eq("cedula", cedula)
+            .single();
+
+        if (errorUsuario) throw errorUsuario;
+
+        // 2. Buscar cuenta asociada
+        const { data: cuenta, error: errorCuenta } = await supabase
+            .from("CUENTA")
+            .select("*")
+            .eq("cedula", cedula)
+            .single();
+
+        if (errorCuenta) throw errorCuenta;
+
+        // 3. Unir datos
+        const usuarioConCuenta = {
+            ...usuario,
+            saldo: cuenta?.saldo || 0,       // 👈 lo expone directo
+            id_cuenta: cuenta?.id_cuenta || null,
+            };
+
+
+        set({ currentUsuario: usuarioConCuenta, loading: false, error: null });
+
+        return usuarioConCuenta;
+        } catch (err) {
+        console.error("❌ Error al obtener usuario:", err.message);
+        set({ loading: false, error: err.message });
+        return null;
+        }
+    },
+
+
 
 }))

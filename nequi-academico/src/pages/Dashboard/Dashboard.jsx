@@ -18,7 +18,6 @@ const Dashboard = () => {
     { titulo: "Solicitar Préstamo", icon: "💰", ruta: "/prestamos" },
     { titulo: "Calculadoras", icon: "📊", ruta: "/simuladores" },
     { titulo: "Historial", icon: "🕑", ruta:"/historial-prestamos"},
-    // { titulo: "Perfil", icon: "👤", ruta: "/perfil" },
   ]
 
   const transacciones = [
@@ -34,6 +33,9 @@ const Dashboard = () => {
           Hola, <span>{currentUsuario?.nombre || "Sin Nombre"}</span>
         </h1>
         <p>Bienvenido a EduBank</p>
+        <button className="mi-cuenta-btn" onClick={() => navigate("/perfil")}>
+          Mi Cuenta
+        </button>
       </header>
 
       <div className="saldo-card">
