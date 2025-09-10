@@ -51,18 +51,6 @@ const Dashboard = () => {
           </button>
         ))}
       </div>
-
-      <h3>Últimas transacciones</h3>
-      <div className="transacciones-card">
-        {transacciones.map((tx, i) => (
-          <div key={i} className="transaccion">
-            <span>{tx.descripcion}</span>
-            <span className={tx.monto < 0 ? "egreso" : "ingreso"}>
-              {tx.monto < 0 ? "-" : "+"}${Math.abs(tx.monto).toLocaleString()}
-            </span>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }

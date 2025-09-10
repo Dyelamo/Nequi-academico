@@ -59,7 +59,6 @@
 /* Grid layout */
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: var(--spacing-xl);
   max-width: 1400px;
   margin: 0 auto;
@@ -72,8 +71,7 @@
   }
 }
 
-.left,
-.right {
+.left{
   background: var(--background-primary);
   border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
@@ -257,7 +255,7 @@ button:disabled {
   background: var(--background-tertiary);
   color: var(--text-primary);
   padding: 0.75rem;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   font-size: 0.875rem;
   border-bottom: 2px solid var(--border-color);
@@ -403,7 +401,7 @@ button:disabled {
 .btn-volver {
   position: relative;
   top: 0px;
-  left: 0px;
+  left: 50px;
   background: white;
   border: 2px solid #3b82f6;
   color: #3b82f6;
@@ -459,10 +457,6 @@ button:disabled {
     font-size: 1.875rem;
   }
 
-  .left,
-  .right {
-    padding: var(--spacing-lg);
-  }
 
   .actions {
     flex-direction: column;

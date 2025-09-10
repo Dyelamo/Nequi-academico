@@ -51,34 +51,6 @@ const Prestamos = () => {
         <div className="left">
           <PrestamoForm onSave={guardarPrestamo} />
         </div>
-        <div className="right">
-          <h2>Solicitudes</h2>
-          {prestamos.length === 0 ? (
-            <p>No hay solicitudes</p>
-          ) : (
-            prestamos.map((p) => (
-              <div className="prestamo-card" key={p.id}>
-                <div className="head">
-                  <strong>{p.tipo}</strong>
-                  <span>{p.estado}</span>
-                </div>
-                <p>Monto: {p.monto.toFixed(2)}</p>
-                <p>
-                  Tasa: {p.tasa}% ({p.unidadTasa})
-                </p>
-                <p>
-                  Plazo: {p.tiempo.años}a {p.tiempo.meses}m {p.tiempo.días}d
-                </p>
-                <div className="card-actions">
-                  <button onClick={() => aprobar(p.id)}>Aprobar</button>
-                  <button onClick={() => rechazar(p.id)} className="danger">
-                    Rechazar
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
       </div>
     </div>
   )
