@@ -1,5 +1,6 @@
 import {supabase} from '../supabase/supabase.config.jsx'
 import {create} from 'zustand'
+import { useStoreUsuarios } from './storeUsuarios.jsx';
 
 export const useStorePrestamos = create((set) => ({
     error: null,
@@ -101,6 +102,8 @@ export const useStorePrestamos = create((set) => ({
             });
 
             if (error) throw error;
+            const { fetchUsuario } = useStoreUsuarios.getState();
+            await fetchUsuario(id_cuenta);
 
             set({ loading: false });
             console.log("✅ Cuota pagada correctamente");
