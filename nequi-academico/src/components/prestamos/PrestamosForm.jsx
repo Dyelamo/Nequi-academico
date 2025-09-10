@@ -108,8 +108,8 @@ const PrestamoForm = ({ onSave }) => {
         <label>Tipo de amortización</label>
         <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
           <option value="FRANCESA">Francesa (cuota constante)</option>
-          <option value="ALEMANA">Alemana (capital constante)</option>
-          <option value="AMERICANA">Americana (bullet)</option>
+          {/* <option value="ALEMANA">Alemana (capital constante)</option>
+          <option value="AMERICANA">Americana (bullet)</option> */}
           <option value="SIMPLE">Interés Simple</option>
         </select>
       </div>

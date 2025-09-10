@@ -8,7 +8,7 @@ import { useStoreRecargaCuenta } from "../../supabase/storeRecargaCuenta";
 const HistorialPrestamos = () => {
 
     const { currentUsuario } = useStoreUsuarios();
-    const {obtenerPrestamosPorUsuario} = useStorePrestamos();
+    const {obtenerPrestamosPorUsuario, pagarCuotaActualizarEstado} = useStorePrestamos();
     const [prestamos, setPrestamos] = useState([]);
     const [selectedPrestamo, setSelectedPrestamo] = useState(null);
     const {obtenerTransaccionesPorUsuario} = useStoreRecargaCuenta();
@@ -19,6 +19,23 @@ const HistorialPrestamos = () => {
             style: "currency",
             currency: "COP"
         }).format(valor);
+
+    const handlePagarCuota = async (id_cuota) => {
+        try {
+            await pagarCuotaActualizarEstado(id_cuota, currentUsuario.id_cuenta);
+
+            // ✅ Recargar préstamos y transacciones después del pago
+            const prestamosData = await obtenerPrestamosPorUsuario(currentUsuario.id_cuenta);
+            setPrestamos(prestamosData || []);
+
+            const transaccionesData = await obtenerTransaccionesPorUsuario(currentUsuario.id_cuenta);
+            setTransacciones(transaccionesData || []);
+
+            alert("✅ Pago realizado correctamente");
+        } catch (err) {
+            alert("❌ Error al pagar la cuota: " + err.message);
+        }
+    };
 
 
     //CARGAR PRESTAMOS
@@ -78,6 +95,7 @@ const HistorialPrestamos = () => {
                                 <th>Interés</th>
                                 <th>Capital</th>
                                 <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,6 +107,18 @@ const HistorialPrestamos = () => {
                                     <td>{formatCOP(c.monto_interes)}</td>
                                     <td>{formatCOP(c.monto_capital)}</td>
                                     <td>{c.estado}</td>
+                                    <td>
+                                        {c.estado === "PENDIENTE" ? (
+                                            <button
+                                                className="btn-pagar"
+                                                onClick={() => handlePagarCuota(c.id_cuota)}
+                                            >
+                                                Pagar
+                                            </button>                                        
+                                            ):(
+                                                <span>✔️ Pagada</span>
+                                            )}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
