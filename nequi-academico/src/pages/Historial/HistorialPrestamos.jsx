@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/historial_transacciones.css"
 import { useStoreRecargaCuenta } from "../../supabase/storeRecargaCuenta";
+import Swal from "sweetalert2";
 
 const HistorialPrestamos = () => {
 
@@ -31,9 +32,19 @@ const HistorialPrestamos = () => {
             const transaccionesData = await obtenerTransaccionesPorUsuario(currentUsuario.id_cuenta);
             setTransacciones(transaccionesData || []);
 
-            alert("✅ Pago realizado correctamente");
+            Swal.fire({
+                title: "¡Éxito!",
+                text: "La operación se completó correctamente",
+                icon: "success",
+                confirmButtonText: "Aceptar",
+});
         } catch (err) {
-            alert("❌ Error al pagar la cuota: " + err.message);
+            Swal.fire({
+                title: "ERROR",
+                text: "Error al pagar la cuota",
+                icon: "error",
+                confirmButtonText: "Aceptar",
+            });
         }
     };
 
