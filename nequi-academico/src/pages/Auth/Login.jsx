@@ -62,7 +62,7 @@ const Login = () => {
         </button>
 
         <div className="login-links">
-          <a href="#">¿Olvidaste tu contraseña?</a>
+          {/* <a href="#">¿Olvidaste tu contraseña?</a> */}
           <p>
             ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
           </p>

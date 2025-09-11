@@ -12,6 +12,7 @@ const InteresSimple = ({ agregarAlHistorial }) => {
   }
 
   const convertirTasaAAnual = (tasa, unidad) => {
+    // tasa: número en la unidad seleccionada (ej: 1.5 si el usuario escribe 1.5)
     switch (unidad) {
       case "mensual":
         return tasa * 12
@@ -24,6 +25,14 @@ const InteresSimple = ({ agregarAlHistorial }) => {
     }
   }
 
+  const parseNumberOrNull = (value) => {
+    if (value === undefined || value === null) return null
+    const trimmed = String(value).trim()
+    if (trimmed === "") return null
+    const n = Number(trimmed)
+    return Number.isFinite(n) ? n : null
+  }
+
   const calcular = (e) => {
     e.preventDefault()
     setError("")
@@ -31,23 +40,24 @@ const InteresSimple = ({ agregarAlHistorial }) => {
     const form = new FormData(e.target)
     const data = Object.fromEntries(form.entries())
 
-    const capital = Number.parseFloat(data.capital) || null
-    const monto = Number.parseFloat(data.monto) || null
-    const tasa = Number.parseFloat(data.tasa) || null
-    const años = Number.parseFloat(data.años) || 0
-    const meses = Number.parseFloat(data.meses) || 0
-    const dias = Number.parseFloat(data.dias) || 0
+    // Parse robustamente
+    const capital = parseNumberOrNull(data.capital)
+    const monto = parseNumberOrNull(data.monto)
+    const tasaInput = parseNumberOrNull(data.tasa) // puede quedar null si el usuario no la puso
+    const años = parseNumberOrNull(data.años) || 0
+    const meses = parseNumberOrNull(data.meses) || 0
+    const dias = parseNumberOrNull(data.dias) || 0
 
-    const camposVacios = []
-    if (!capital) camposVacios.push("capital")
-    if (!monto) camposVacios.push("monto")
-    if (!tasa) camposVacios.push("tasa")
+    // Detectar cuál(es) faltan
+    const faltantes = []
+    if (capital === null) faltantes.push("capital")
+    if (monto === null) faltantes.push("monto")
+    if (tasaInput === null) faltantes.push("tasa")
 
-    // Verificar si hay tiempo ingresado
     const tiempoIngresado = años > 0 || meses > 0 || dias > 0
-    if (!tiempoIngresado) camposVacios.push("tiempo")
+    if (!tiempoIngresado) faltantes.push("tiempo")
 
-    if (camposVacios.length !== 1) {
+    if (faltantes.length !== 1) {
       setError("Debes llenar exactamente 3 campos y dejar 1 vacío para calcular")
       return
     }
@@ -55,83 +65,121 @@ const InteresSimple = ({ agregarAlHistorial }) => {
     const tiempoEnAnios = convertirTiempoAAnios(años, meses, dias)
 
     let res = null
-    let unidad = ""
+    let unidadMostrar = ""
     let modo = ""
-
     try {
-      if (camposVacios[0] === "monto") {
-        const tasaAnual = convertirTasaAAnual(tasa, data.unidadTasa)
+      const unidadTasa = data.unidadTasa || "anual"
+
+      if (faltantes[0] === "monto") {
+        // monto = C * (1 + i_anual * t)
+        if (capital === null || tasaInput === null) {
+          setError("Faltan datos para calcular el monto")
+          return
+        }
+        const tasaAnual = convertirTasaAAnual(tasaInput, unidadTasa) // % anual
         res = capital * (1 + (tasaAnual / 100) * tiempoEnAnios)
-        unidad = "COP"
+        unidadMostrar = "COP"
         modo = "Monto Futuro"
-      } else if (camposVacios[0] === "capital") {
-        const tasaAnual = convertirTasaAAnual(tasa, data.unidadTasa)
+      } else if (faltantes[0] === "capital") {
+        // C = monto / (1 + i_anual * t)
+        if (monto === null || tasaInput === null) {
+          setError("Faltan datos para calcular el capital")
+          return
+        }
+        const tasaAnual = convertirTasaAAnual(tasaInput, unidadTasa) // % anual
         res = monto / (1 + (tasaAnual / 100) * tiempoEnAnios)
-        unidad = "COP"
+        unidadMostrar = "COP"
         modo = "Capital Inicial"
-      } else if (camposVacios[0] === "tasa") {
+      } else if (faltantes[0] === "tasa") {
+        // calcular tasa: i_anual = (monto - capital) / (capital * t)  -> en porcentaje
+        if (capital === null || monto === null) {
+          setError("Faltan datos para calcular la tasa")
+          return
+        }
         if (tiempoEnAnios === 0) {
           setError("El tiempo debe ser mayor a 0 para calcular la tasa")
           return
         }
-        res = ((monto - capital) / (capital * tiempoEnAnios)) * 100
 
-        switch (data.unidadTasa) {
+        const tasaAnualPorc = ((monto - capital) / (capital * tiempoEnAnios)) * 100 // % anual
+        // Convertir a la unidad pedida para mostrar (ej mensual = anual/12)
+        let tasaEnUnidad = tasaAnualPorc
+        switch (unidadTasa) {
           case "mensual":
-            res = res / 12
+            tasaEnUnidad = tasaAnualPorc / 12
             break
           case "trimestral":
-            res = res / 4
+            tasaEnUnidad = tasaAnualPorc / 4
             break
           case "diaria":
-            res = res / 365
+            tasaEnUnidad = tasaAnualPorc / 365
             break
-          // anual se mantiene igual
+          // anual -> se mantiene
         }
 
-        unidad = `% ${data.unidadTasa}`
+        res = tasaEnUnidad // valor numérico en la unidad elegida
+        unidadMostrar = unidadTasa
         modo = "Tasa de Interés"
-      } else if (camposVacios[0] === "tiempo") {
-        const tasaAnual = convertirTasaAAnual(tasa, data.unidadTasa)
+      } else if (faltantes[0] === "tiempo") {
+        // t = (monto - capital) / (capital * i_anual)
+        if (capital === null || monto === null || tasaInput === null) {
+          setError("Faltan datos para calcular el tiempo")
+          return
+        }
+        const tasaAnual = convertirTasaAAnual(tasaInput, data.unidadTasa)
         if (tasaAnual === 0) {
           setError("La tasa debe ser mayor a 0 para calcular el tiempo")
           return
         }
         res = (monto - capital) / (capital * (tasaAnual / 100))
-        unidad = "años"
+        unidadMostrar = "años"
         modo = "Tiempo"
       }
 
+      // Registro para historial (string friendly)
       const registro = {
         categoria: "Interés Simple",
         modo,
         variables: {
-          capital: capital || (camposVacios[0] === "capital" ? res : capital),
-          monto: monto || (camposVacios[0] === "monto" ? res : monto),
-          tasa: camposVacios[0] === "tasa" ? `${res.toFixed(4)} ${unidad}` : `${tasa} % ${data.unidadTasa}`,
-          tiempo:
-            camposVacios[0] === "tiempo" ? `${res.toFixed(4)} años` : `${años || 0}a ${meses || 0}m ${dias || 0}d`,
+          capital: capital ?? (faltantes[0] === "capital" ? res : capital),
+          monto: monto ?? (faltantes[0] === "monto" ? res : monto),
+          tasa:
+            faltantes[0] === "tasa"
+              ? `${res.toFixed(6)} % ${unidadMostrar} (≈ ${(
+                  convertirTasaAAnual(res, unidadMostrar) || 0
+                ).toFixed(2)} % anual)`
+              : `${tasaInput ?? 0} % ${data.unidadTasa}`,
+          tiempo: faltantes[0] === "tiempo" ? `${res.toFixed(2)} años` : `${años || 0}a ${meses || 0}m ${dias || 0}d`,
         },
         resultado: res,
-        unidad,
+        unidad: unidadMostrar,
         fecha: new Date().toLocaleString(),
       }
 
-      const tasaParaMostrar = camposVacios[0] === "tasa" ? res : convertirTasaAAnual(tasa, data.unidadTasa)
+      // Preparar el objeto resultado para la UI
+      // Si calculamos tasa, 'res' está en la unidad elegida (mensual/trimestral/diaria/anual)
+      let tasaParaMostrar = null
+      if (faltantes[0] === "tasa") {
+        tasaParaMostrar = res
+      } else {
+        // si no calculamos la tasa, mostramos la tasa como número en la unidad seleccionada
+        tasaParaMostrar = tasaInput
+      }
 
       setResultado({
         valor: res,
-        unidad,
+        unidad: unidadMostrar,
         modo,
-        capital: capital || res,
-        monto: monto || res,
+        capital: capital ?? (faltantes[0] === "capital" ? res : capital),
+        monto: monto ?? (faltantes[0] === "monto" ? res : monto),
         tasa: tasaParaMostrar,
-        tiempo: camposVacios[0] === "tiempo" ? res : tiempoEnAnios,
+        tiempo: faltantes[0] === "tiempo" ? res : tiempoEnAnios,
+        unidadTasa: data.unidadTasa,
       })
 
-      agregarAlHistorial(registro)
-    } catch (error) {
-      console.log("[v0] Error en cálculo:", error)
+      if (typeof agregarAlHistorial === "function") agregarAlHistorial(registro)
+    } catch (err) {
+      console.log("[v1] Error en cálculo:", err)
       setError("Error en el cálculo. Verifica los valores ingresados.")
     }
   }
@@ -157,8 +205,8 @@ const InteresSimple = ({ agregarAlHistorial }) => {
         <div className="input-group">
           <label>Tasa de Interés</label>
           <div className="input-with-select">
-            <input name="tasa" type="number" placeholder="Ej: 12" step="0.01" />
-            <select name="unidadTasa">
+            <input name="tasa" type="number" placeholder="Ej: 12" step="0.000001" />
+            <select name="unidadTasa" defaultValue="anual">
               <option value="anual">% Anual</option>
               <option value="mensual">% Mensual</option>
               <option value="trimestral">% Trimestral</option>
@@ -188,23 +236,29 @@ const InteresSimple = ({ agregarAlHistorial }) => {
       {resultado && (
         <div className="resultado">
           <h3>
-            {resultado.modo}: {resultado.valor.toFixed(2)} {resultado.unidad}
+            {resultado.modo}: {Number(resultado.valor).toFixed(2)} {resultado.unidad === "COP" ? "COP" : resultado.unidad}
           </h3>
           <div className="detalles">
             <p>
-              <strong>Capital:</strong> ${resultado.capital.toFixed(2)} COP
+              <strong>Capital:</strong> ${Number(resultado.capital || 0).toFixed(2)} COP
             </p>
             <p>
-              <strong>Monto Futuro:</strong> ${resultado.monto.toFixed(2)} COP
+              <strong>Monto Futuro:</strong> ${Number(resultado.monto || 0).toFixed(2)} COP
             </p>
             <p>
-              <strong>Tasa:</strong> {resultado.tasa.toFixed(2)}% anual
+              <strong>Tasa:</strong>{" "}
+              {resultado.tasa !== null && resultado.tasa !== undefined
+                ? `${Number(resultado.tasa).toFixed(6)} % ${resultado.unidadTasa}`
+                : "—"}
+              {resultado.unidadTasa !== "anual" && resultado.unidadTasa
+                ? ` (≈ ${Number(convertirTasaAAnual(resultado.tasa || 0, resultado.unidadTasa)).toFixed(6)} % anual)`
+                : ""}
             </p>
             <p>
-              <strong>Tiempo:</strong> {resultado.tiempo.toFixed(2)} años
+              <strong>Tiempo:</strong> {Number(resultado.tiempo).toFixed(1)} años
             </p>
             <p>
-              <strong>Interés Ganado:</strong> ${(resultado.monto - resultado.capital).toFixed(2)} COP
+              <strong>Interés Ganado:</strong> ${Number((resultado.monto || 0) - (resultado.capital || 0)).toFixed(2)} COP
             </p>
           </div>
         </div>
