@@ -43,7 +43,7 @@ const Prestamos = () => {
                 className="btn-volver"
                 onClick={() => navigate("/dashboard")}
             >
-                ←
+                ← Volver
       </button>
       
       <h1>Préstamos</h1>
