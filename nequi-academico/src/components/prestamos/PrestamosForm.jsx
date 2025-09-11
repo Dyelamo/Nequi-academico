@@ -9,6 +9,7 @@ import {
   scheduleAmericana,
   //tiempoEnPeriodos,
   // tasaPorPeriodo,
+  scheduleCompuesto
 } from "../../utils/prestamos"
 
 const PrestamoForm = ({ onSave }) => {
@@ -56,6 +57,11 @@ const PrestamoForm = ({ onSave }) => {
         result = scheduleAmericana(monto, tasa, formValues.unidadTasa || "anual", tiempoObj, pagosPorAño)
         schedule = result.rows
         break
+      case "COMPUESTO":
+        result = scheduleCompuesto(monto, tasa, formValues.unidadTasa || "anual", tiempoObj, pagosPorAño)
+        schedule = result.rows
+        break
+
       default:
         return
     }
@@ -107,10 +113,11 @@ const PrestamoForm = ({ onSave }) => {
       <div className="row">
         <label>Tipo de amortización</label>
         <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
-          <option value="FRANCESA">Francesa (cuota constante)</option>
+          {/* <option value="FRANCESA">Francesa (cuota constante)</option> */}
           {/* <option value="ALEMANA">Alemana (capital constante)</option>
           <option value="AMERICANA">Americana (bullet)</option> */}
           <option value="SIMPLE">Interés Simple</option>
+          <option value="COMPUESTO">Interés Compuesto</option> {/* 👈 NUEVO */}
         </select>
       </div>
 
