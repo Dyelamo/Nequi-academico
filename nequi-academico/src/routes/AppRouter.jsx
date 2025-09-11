@@ -7,6 +7,7 @@ import  Prestamos  from "../pages/Prestamos/Prestamos";
 import PrivateRoutes from "../utils/PrivateToutes";
 import HistorialPrestamos from "../pages/Historial/HistorialPrestamos";
 import Recargar_cuenta from "../pages/Recargar/Recargar_cuenta";
+import Perfil from "../pages/Dashboard/Perfil";
 
 const AppRouter = () => {
   return (
@@ -30,6 +31,7 @@ const AppRouter = () => {
         <Route path="/prestamos" element={<Prestamos />} />
         <Route path="/historial-prestamos" element={<HistorialPrestamos />} />
         <Route path="/recargar-saldo" element={<Recargar_cuenta />} />
+        <Route path="/perfil" element={<Perfil/>}></Route>
 
 
       </Routes>

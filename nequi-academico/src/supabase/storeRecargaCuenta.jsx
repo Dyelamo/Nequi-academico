@@ -58,4 +58,30 @@ export const useStoreRecargaCuenta = create((set) => ({
         throw err;
         }
     },
+
+    obtenerTransaccionesPorUsuario: async (id_cuenta) => {
+        set({ loading: true, error: null });
+        try {
+            // 1. Consultar transacciones por cuenta
+            const { data, error } = await supabase
+                .from("TRANSACCIONES")
+                .select("*")
+                .eq("id_cuenta", id_cuenta)
+                .order("fecha_transaccion", { ascending: false }); // más recientes primero
+
+            if (error) throw error;
+
+            // 2. Actualizar el estado global
+            set({ loading: false, recargas: data });
+
+            console.log("📌 Transacciones obtenidas:", data);
+
+            return data;
+        } catch (err) {
+            console.error("❌ Error al obtener transacciones:", err);
+            set({ loading: false, error: err.message });
+            throw err;
+        }
+    }
+
 }))

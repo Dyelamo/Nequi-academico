@@ -1,0 +1,240 @@
+/* Perfil Styles - Modern User Profile Design */
+
+.perfil {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    min-height: 100vh;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.perfil h2 {
+    text-align: center;
+    color: #1e293b;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #3b82f6, #fdfdfd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.perfil-info {
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.perfil-info::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease-in-out infinite;
+}
+
+
+
+.perfil-info:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(59, 130, 246, 0.15);
+}
+
+.perfil-info p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    margin: 0.5rem 0;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #3b82f6;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.perfil-info p::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    transition: left 0.5s ease;
+}
+
+.perfil-info p:hover::before {
+    left: 100%;
+}
+
+.perfil-info p:hover {
+    background: #f1f5f9;
+    transform: translateX(5px);
+    border-left-color: #1d4ed8;
+}
+
+.perfil-info p strong {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 1rem;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+}
+
+.perfil-info p strong::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    background: #3b82f6;
+    border-radius: 50%;
+    margin-left: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.2);
+    }
+}
+
+.perfil-info p:last-child strong::after {
+    background: #059669;
+}
+
+.perfil-info p:last-child {
+    border-left-color: #059669;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.perfil-info p:last-child:hover {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border-left-color: #047857;
+}
+
+/* Loading and Error States */
+.perfil p {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+
+.perfil>p:first-of-type {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+    animation: loadingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.perfil p[style*="red"] {
+    background: linear-gradient(135deg, #fef2f2, #fecaca);
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .perfil {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .perfil h2 {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .perfil-info {
+        padding: 1.5rem;
+        border-radius: 15px;
+    }
+
+    .perfil-info p {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+
+    .perfil-info p strong {
+        min-width: auto;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .perfil {
+        margin: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    .perfil h2 {
+        font-size: 1.75rem;
+    }
+
+    .perfil-info {
+        padding: 1rem;
+    }
+
+    .perfil-info p {
+        padding: 0.75rem;
+        margin: 0.25rem 0;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+
+
+    .perfil-info {
+        background: #334155;
+        border-color: #475569;
+    }
+
+    .perfil-info p {
+        background: #475569;
+        color: #f1f5f9;
+    }
+
+    .perfil-info p:hover {
+        background: #64748b;
+    }
+
+    .perfil-info p strong {
+        color: #f8fafc;
+    }
+}

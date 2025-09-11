@@ -5,6 +5,7 @@ import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import "../../styles/Login.css"
 import { useStoreUsuarios } from "../../supabase/storeUsuarios.jsx"
+import Swal from "sweetalert2"
 
 const Login = () => {
   const [cedula, setCedula] = useState("")
@@ -22,10 +23,19 @@ const Login = () => {
 
     try {
       await autenticarUsuario(cedula, password)
-      alert("Inicio de sesión exitoso")
+      Swal.fire({
+        text: "Inicio de sesión exitoso",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
       navigate("/dashboard")
     } catch (error) {
-      alert("Error al iniciar sesión: " + error.message)
+      Swal.fire({
+        title: "ERROR",
+        text: "Error al iniciar sesión",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
     }
   }
 

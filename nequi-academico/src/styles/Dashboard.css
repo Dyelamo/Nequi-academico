@@ -13,6 +13,8 @@
 .dashboard-container header {
   margin-bottom: 30px;
   text-align: center;
+  /* Added relative positioning for button placement */
+  position: relative;
 }
 
 .dashboard-container header h1 {
@@ -31,6 +33,33 @@
   font-size: 1.1rem;
   color: #64748b;
   margin: 0;
+}
+
+/* Added styles for Mi Cuenta button positioned in top right */
+.mi-cuenta-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.mi-cuenta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.mi-cuenta-btn:active {
+  transform: translateY(0);
 }
 
 /* Saldo Card */
@@ -210,6 +239,12 @@
     align-items: flex-start;
     gap: 5px;
   }
+
+  /* Adjusted button size for mobile */
+  .mi-cuenta-btn {
+    padding: 10px 16px;
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -223,5 +258,11 @@
 
   .accesos-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Further adjusted button for small screens */
+  .mi-cuenta-btn {
+    padding: 8px 12px;
+    font-size: 0.75rem;
   }
 }

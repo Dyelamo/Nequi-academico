@@ -1,5 +1,6 @@
 import {supabase} from '../supabase/supabase.config.jsx'
 import {create} from 'zustand'
+import { useStoreUsuarios } from './storeUsuarios.jsx';
 
 export const useStorePrestamos = create((set) => ({
     error: null,
@@ -91,6 +92,29 @@ export const useStorePrestamos = create((set) => ({
             throw new Error(err.message);
         }
     },
+
+    pagarCuotaActualizarEstado: async (id_cuota, id_cuenta) => {
+        set({ loading: true, error: null });
+        try {
+            const { error } = await supabase.rpc("pagar_cuota", {
+                cuota_id: id_cuota,
+                cuenta_id: id_cuenta,
+            });
+
+            if (error) throw error;
+            const { fetchUsuario } = useStoreUsuarios.getState();
+            await fetchUsuario(id_cuenta);
+
+            set({ loading: false });
+            console.log("✅ Cuota pagada correctamente");
+            return true;
+        } catch (err) {
+            console.error("❌ Error al pagar cuota:", err);
+            set({ loading: false, error: err.message });
+            throw new Error(err.message);
+        }
+    }
+
 
 
 

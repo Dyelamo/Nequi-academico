@@ -5,6 +5,7 @@ import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import "../../styles/Register.css"
 import { useStoreUsuarios } from "../../supabase/storeUsuarios"
+import Swal from "sweetalert2"
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -28,13 +29,21 @@ const Register = () => {
     // Validar que ningún campo esté vacío
     for (const key in form) {
       if (form[key].trim() === "") {
-        alert(`El campo "${key}" no puede estar vacío`)
+        Swal.fire({
+          title: "oops...",
+          text: "Hay Campos Vacíos",
+          icon: "question"
+        });
         return
       }
     }
 
     if (form.password !== form.confirmPassword) {
-      alert("Las contraseñas no coinciden")
+      Swal.fire({
+          title: "oops...",
+          text: "Las contraseñas no coinciden",
+          icon: "question"
+        });
       return
     }
 
@@ -46,10 +55,18 @@ const Register = () => {
         telefono: form.telefono,
         password: form.password,
       })
-      alert("Usuario creado exitosamente")
+      Swal.fire({
+        title: "Bienvenido a EduBank",
+        icon: "Usuario creado exitosamente",
+        draggable: true
+      });
       navigate("/")
     } catch (error) {
-      alert("Error al crear usuario: " + error.message)
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Error al crear usuario",
+      });
     }
   }
 

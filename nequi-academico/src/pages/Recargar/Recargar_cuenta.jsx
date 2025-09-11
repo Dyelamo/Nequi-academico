@@ -1,6 +1,8 @@
 import { useStoreUsuarios } from "../../supabase/storeUsuarios"
 import { useStoreRecargaCuenta } from "../../supabase/storeRecargaCuenta"
 import { useState, useEffect } from "react"
+import "../../styles/recargar_cuenta.css"
+import { useNavigate } from "react-router-dom"
 
 
 
@@ -22,10 +24,17 @@ const Recargar_cuenta = () => {
         setDescripcion("");
     };
 
+    const navigate = useNavigate();
+
 
 
     return (
         <div className="recargar-cuenta">
+
+            <button className="btn-volver" onClick={() => navigate("/dashboard")}>
+                ←
+            </button>
+
         <h2>Recargar cuenta</h2>
 
         {/* Formulario de recarga */}

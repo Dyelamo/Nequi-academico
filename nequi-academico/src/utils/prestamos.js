@@ -226,3 +226,50 @@ export function scheduleAmericana(monto, tasa, unidadTasa, tiempo, pagosPorAño)
     totalInterest,
   }
 }
+
+
+/**
+ * Interés compuesto (sin amortización, solo cálculo de monto final)
+ * Fórmula: M = C * (1 + i)^n
+ */
+/**
+ * Interés compuesto con cuotas periódicas
+ * M = C * (1 + i)^n
+ */
+export function scheduleCompuesto(monto, tasa, unidadTasa, tiempo, pagosPorAño) {
+  const n = tiempoEnPeriodos(tiempo, pagosPorAño)
+  const tasaPeriodo = tasaPorPeriodo(tasa, unidadTasa, pagosPorAño)
+
+  // Monto final por interés compuesto
+  const montoFinal = monto * Math.pow(1 + tasaPeriodo, n)
+  const interesTotal = montoFinal - monto
+
+  // Cuota periódica (amortización tipo "francesa" pero con interés compuesto)
+  const pagoPeriodico = montoFinal / n
+
+  const rows = []
+  let balance = montoFinal
+
+  for (let i = 1; i <= n; i++) {
+    const interesPeriodo = balance * tasaPeriodo
+    const capitalPeriodo = pagoPeriodico - interesPeriodo
+    balance -= pagoPeriodico
+
+    rows.push({
+      periodo: i,
+      pago: pagoPeriodico,
+      interest: interesPeriodo,
+      principal: capitalPeriodo,
+      balance: Math.max(0, balance),
+    })
+  }
+
+  return {
+    rows,
+    n,
+    pagoPeriodico,
+    totalPayment: montoFinal,
+    totalInterest: interesTotal,
+  }
+}
+
