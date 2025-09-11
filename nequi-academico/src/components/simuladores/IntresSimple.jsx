@@ -25,13 +25,59 @@ const InteresSimple = ({ agregarAlHistorial }) => {
     }
   }
 
+  // const parseNumberOrNull = (value) => {
+  //   if (value === undefined || value === null) return null
+  //   const trimmed = String(value).trim()
+  //   if (trimmed === "") return null
+  //   const n = Number(trimmed)
+  //   return Number.isFinite(n) ? n : null
+  // }
+
+
+  //NUEVA 
   const parseNumberOrNull = (value) => {
     if (value === undefined || value === null) return null
-    const trimmed = String(value).trim()
-    if (trimmed === "") return null
-    const n = Number(trimmed)
+    let s = String(value).trim()
+
+    if (s === "") return null
+
+    // quitar símbolos monetarios y espacios (ej "€", "$", "COP", " ")
+    s = s.replace(/[^\d.,-]/g, "")
+
+    // si se tiene tanto '.' como ',' -> asumimos formato europeo: puntos = miles, coma = decimal
+    if (s.includes(".") && s.includes(",")) {
+      s = s.replace(/\./g, "") // quitar miles
+      s = s.replace(",", ".") // coma -> punto decimal
+      const n = Number(s)
+      return Number.isFinite(n) ? n : null
+    }
+
+    // solo contiene ',' -> asumimos coma decimal (ej "1234,56")
+    if (s.includes(",") && !s.includes(".")) {
+      s = s.replace(",", ".")
+      const n = Number(s)
+      return Number.isFinite(n) ? n : null
+    }
+
+    // solo contiene '.' -> puede ser decimal ("1234.56") o miles ("1.234")
+    if (s.includes(".") && !s.includes(",")) {
+      // si hay puntos seguidos de exactamente 3 dígitos (p. ej "1.234" o "12.345.678") => tratamos '.' como separador de miles
+      if (/\.\d{3}(?:\.|$)/.test(s)) {
+        s = s.replace(/\./g, "")
+        const n = Number(s)
+        return Number.isFinite(n) ? n : null
+      }
+      // si no, tratamos '.' como separador decimal
+      const n = Number(s)
+      return Number.isFinite(n) ? n : null
+    }
+
+    // solo dígitos (positivo/negativo)
+    const n = Number(s)
     return Number.isFinite(n) ? n : null
   }
+
+
 
   const calcular = (e) => {
     e.preventDefault()
