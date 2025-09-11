@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState } from "react";
 
@@ -14,8 +14,9 @@ const formatCOP = (valor) => {
 
 const Anualidades = () => {
   const [A, setA] = useState("");
-  const [tasa, setTasa] = useState(""); // en porcentaje (ej: 12)
+  const [tasa, setTasa] = useState(""); // porcentaje ej. 12 => 12%
   const [N, setN] = useState("");
+  const [modo, setModo] = useState("VF"); // "VF" o "VA"
   const [error, setError] = useState("");
   const [resultado, setResultado] = useState(null);
 
@@ -32,42 +33,61 @@ const Anualidades = () => {
     if (!isFinite(tasaNum)) return setError("Ingresa una tasa válida (puede ser 0).");
     if (!Number.isInteger(nNum) || nNum <= 0) return setError("Ingresa un número de periodos (N) entero y mayor que 0.");
 
-    // tasa por periodo en decimal
+    // convertir a decimal
     const i = tasaNum / 100;
 
-    // Si i === 0 -> VF = A * N (caso límite)
-    let VF;
-    let paso = null;
+    // caso límite i ~ 0
+    let valor = 0;
+    let paso = {};
 
     if (Math.abs(i) < 1e-12) {
-      VF = aNum * nNum;
+      // límite: tanto VF como VA -> A * N
+      valor = aNum * nNum;
       paso = {
+        formulaAplicada: modo === "VF"
+          ? "Caso límite i = 0 → VF = A × N"
+          : "Caso límite i = 0 → VA = A × N",
         i,
-        pow: 1,
         numerador: nNum,
         denominador: 1,
-        formulaAplicada: "Caso límite i = 0 → VF = A * N",
       };
     } else {
-      const pow = Math.pow(1 + i, nNum);
-      const numerador = pow - 1;
-      const denominador = i;
-      VF = aNum * (numerador / denominador);
-      paso = {
-        i,
-        pow,
-        numerador,
-        denominador,
-        formulaAplicada: "VF = A * ((1 + i)^N - 1) / i",
-      };
+      if (modo === "VF") {
+        // VF = A * ((1 + i)^N - 1) / i
+        const pow = Math.pow(1 + i, nNum);
+        const numerador = pow - 1;
+        const denominador = i;
+        valor = aNum * (numerador / denominador);
+        paso = {
+          formulaAplicada: "VF = A * ((1 + i)^N - 1) / i",
+          pow,
+          numerador,
+          denominador,
+          factor: numerador / denominador,
+        };
+      } else {
+        // VA = A * (1 - (1 + i)^-N) / i
+        const powInv = Math.pow(1 + i, -nNum); // (1+i)^-N
+        const numerador = 1 - powInv;
+        const denominador = i;
+        valor = aNum * (numerador / denominador);
+        paso = {
+          formulaAplicada: "VA = A * (1 - (1 + i)^-N) / i",
+          powInv,
+          numerador,
+          denominador,
+          factor: numerador / denominador,
+        };
+      }
     }
 
     setResultado({
+      modo,
       A: aNum,
       tasaPercent: tasaNum,
       i,
       N: nNum,
-      VF,
+      valor,
       paso,
     });
   };
@@ -76,17 +96,27 @@ const Anualidades = () => {
     setA("");
     setTasa("");
     setN("");
+    setModo("VF");
     setError("");
     setResultado(null);
   };
 
   return (
-    <div style={{ maxWidth: 720, margin: "0 auto", padding: 16 }}>
-      <h2>Anualidades — Calcular Valor Futuro (VF)</h2>
-      {/* <p>Fórmula usada: <code>VF = A * ((1 + i)^N - 1) / i</code></p> */}
 
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-        <label>
+    <div style={{ maxWidth: 780, margin: "0 auto", padding: 16 }} className="input-group">
+      <h2>Anualidades — VF / VA</h2>
+      <p>Elige la operación y completa Anualidad (A), Tasa (%) y N (periodos).</p>
+
+      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }} className="formulario">
+        <label className="row">
+          Modo
+          <select value={modo} onChange={(e) => setModo(e.target.value)} style={{ width: "100%", padding: 8, marginTop: 6 }}>
+            <option value="VF">Valor Futuro (VF)</option>
+            <option value="VA">Valor Actual / Presente (VA)</option>
+          </select>
+        </label>
+
+        <label className="row">
           Anualidad (A)
           <input
             type="number"
@@ -98,7 +128,7 @@ const Anualidades = () => {
           />
         </label>
 
-        <label>
+        <label className="row">
           Tasa (%) — i en %
           <input
             type="number"
@@ -110,7 +140,7 @@ const Anualidades = () => {
           />
         </label>
 
-        <label>
+        <label className="row">
           Número de periodos de capitalización (N)
           <input
             type="number"
@@ -132,35 +162,44 @@ const Anualidades = () => {
       </form>
 
       {resultado && (
-        <div style={{ marginTop: 20, padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-          <h3>Resultado</h3>
+        <div style={{ marginTop: 20, padding: 14, border: "1px solid #e0e0e0", borderRadius: 8 }}>
+          <h3>{resultado.modo === "VF" ? "Valor Futuro (VF)" : "Valor Actual (VA)"}</h3>
+
           <p><strong>Anualidad (A):</strong> {formatCOP(resultado.A)}</p>
-          <p><strong>Tasa (i):</strong> {resultado.tasaPercent}% → <code>i = {resultado.i.toFixed(6)}</code> (decimal por periodo)</p>
+          <p><strong>Tasa (%):</strong> {resultado.tasaPercent}% → <code>i = {resultado.i.toFixed(8)}</code></p>
           <p><strong>N (periodos):</strong> {resultado.N}</p>
 
           <hr />
 
-          <h4>Desglose del cálculo</h4>
-          {resultado.paso.formulaAplicada && (
-            <p><em>{resultado.paso.formulaAplicada}</em></p>
-          )}
+          <h4>Desglose</h4>
+          <p><em>{resultado.paso.formulaAplicada}</em></p>
 
           {Math.abs(resultado.i) < 1e-12 ? (
             <>
-              <p>Caso límite i = 0:</p>
-              <p>VF = A × N = {formatCOP(resultado.A)} × {resultado.N} = <strong>{formatCOP(resultado.VF)}</strong></p>
+              <p>Caso límite i = 0 (evita división por 0):</p>
+              <p>
+                Resultado = A × N = {formatCOP(resultado.A)} × {resultado.N} = <strong>{formatCOP(resultado.valor)}</strong>
+              </p>
             </>
           ) : (
             <>
-              <p>(1 + i)^N = <code>{(1 + resultado.i).toFixed(8)}^{resultado.N} = {resultado.paso.pow.toFixed(8)}</code></p>
-              <p>Numerador = (1 + i)^N - 1 = {resultado.paso.numerador.toFixed(8)}</p>
-              <p>Denominador = i = {resultado.paso.denominador.toFixed(8)}</p>
-              <p>
-                Factor acumulado = <code>((1+i)^N - 1) / i</code> = { (resultado.paso.numerador / resultado.paso.denominador).toFixed(8) }
-              </p>
-              <p>
-                VF = A × factor = {formatCOP(resultado.A)} × { (resultado.paso.numerador / resultado.paso.denominador).toFixed(8) } = <strong>{formatCOP(resultado.VF)}</strong>
-              </p>
+              {resultado.modo === "VF" ? (
+                <>
+                  <p>(1 + i)^N = {resultado.paso.pow?.toFixed(8)}</p>
+                  <p>Numerador = (1 + i)^N - 1 = {resultado.paso.numerador?.toFixed(8)}</p>
+                  <p>Denominador = i = {resultado.paso.denominador?.toFixed(8)}</p>
+                  <p>Factor = ( (1+i)^N - 1 ) / i = {resultado.paso.factor?.toFixed(8)}</p>
+                  <p>VF = A × factor = {formatCOP(resultado.A)} × {resultado.paso.factor?.toFixed(8)} = <strong>{formatCOP(resultado.valor)}</strong></p>
+                </>
+              ) : (
+                <>
+                  <p>(1 + i)^-N = {resultado.paso.powInv?.toFixed(8)}</p>
+                  <p>Numerador = 1 - (1 + i)^-N = {resultado.paso.numerador?.toFixed(8)}</p>
+                  <p>Denominador = i = {resultado.paso.denominador?.toFixed(8)}</p>
+                  <p>Factor = (1 - (1+i)^-N) / i = {resultado.paso.factor?.toFixed(8)}</p>
+                  <p>VA = A × factor = {formatCOP(resultado.A)} × {resultado.paso.factor?.toFixed(8)} = <strong>{formatCOP(resultado.valor)}</strong></p>
+                </>
+              )}
             </>
           )}
         </div>
