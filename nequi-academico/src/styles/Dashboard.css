@@ -13,7 +13,6 @@
 .dashboard-container header {
   margin-bottom: 30px;
   text-align: center;
-  /* Added relative positioning for button placement */
   position: relative;
 }
 
@@ -35,11 +34,19 @@
   margin: 0;
 }
 
-/* Added styles for Mi Cuenta button positioned in top right */
-.mi-cuenta-btn {
+/* Added container for buttons to position them side by side */
+.buttons-container {
   position: absolute;
   top: 0;
   right: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Updated mi-cuenta-btn to work within flex container */
+.mi-cuenta-btn {
+  position: static;
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
   border: none;
@@ -59,6 +66,30 @@
 }
 
 .mi-cuenta-btn:active {
+  transform: translateY(0);
+}
+
+/* Added styles for smaller second button */
+.mi-cuenta-btn2 {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.3);
+}
+
+.mi-cuenta-btn2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+  background-color: #ff0000;
+}
+
+.mi-cuenta-btn2:active {
   transform: translateY(0);
 }
 
@@ -245,6 +276,18 @@
     padding: 10px 16px;
     font-size: 0.8rem;
   }
+
+  /* Adjusted buttons container for mobile */
+  .buttons-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Made second button even smaller on mobile */
+  .mi-cuenta-btn2 {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -260,9 +303,31 @@
     grid-template-columns: 1fr;
   }
 
+  .acceso-card {
+    padding: 15px;
+  }
+
+  .acceso-card span {
+    font-size: 1.8rem;
+  }
+
+  .transacciones-card {
+    padding: 15px;
+  }
+
+  .transaccion {
+    padding: 10px 0;
+  }
+
   /* Further adjusted button for small screens */
   .mi-cuenta-btn {
     padding: 8px 12px;
     font-size: 0.75rem;
+  }
+
+  /* Further reduced second button size for small screens */
+  .mi-cuenta-btn2 {
+    padding: 5px 10px;
+    font-size: 0.7rem;
   }
 }

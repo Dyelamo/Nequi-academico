@@ -29,13 +29,25 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <header>
+        <div className="buttons-container">
+
+          <button className="mi-cuenta-btn" onClick={() => navigate("/perfil")}>
+          Mi Cuenta
+        </button>
+        <button className="mi-cuenta-btn2" onClick={() => navigate("/")}>
+          Salir
+        </button>
+
+        </div>
+
+      
+
+
         <h1>
           Hola, <span>{currentUsuario?.nombre || "Sin Nombre"}</span>
         </h1>
         <p>Bienvenido a EduBank</p>
-        <button className="mi-cuenta-btn" onClick={() => navigate("/perfil")}>
-          Mi Cuenta
-        </button>
+        
       </header>
 
       <div className="saldo-card">
