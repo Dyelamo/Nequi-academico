@@ -1,91 +1,333 @@
+/* Dashboard Styles - CSS Puro */
+
 .dashboard-container {
-  background: var(--muted);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8fafc;
   min-height: 100vh;
-  padding: 1.5rem;
 }
 
-header {
-  margin-bottom: 1.5rem;
+/* Header Styles */
+.dashboard-container header {
+  margin-bottom: 30px;
+  text-align: center;
+  position: relative;
 }
 
-header h1 {
-  font-size: 1.2rem;
+.dashboard-container header h1 {
+  font-size: 2.5rem;
+  color: #1e293b;
+  margin: 0 0 10px 0;
   font-weight: 600;
 }
 
-header h1 span {
-  font-weight: bold;
-  color: var(--primary);
+.dashboard-container header h1 span {
+  color: #3b82f6;
+  font-weight: 700;
 }
 
-header p {
-  color: var(--muted-foreground);
+.dashboard-container header p {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin: 0;
 }
 
+/* Added container for buttons to position them side by side */
+.buttons-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Updated mi-cuenta-btn to work within flex container */
+.mi-cuenta-btn {
+  position: static;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.mi-cuenta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.mi-cuenta-btn:active {
+  transform: translateY(0);
+}
+
+/* Added styles for smaller second button */
+.mi-cuenta-btn2 {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.3);
+}
+
+.mi-cuenta-btn2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+  background-color: #ff0000;
+}
+
+.mi-cuenta-btn2:active {
+  transform: translateY(0);
+}
+
+/* Saldo Card */
 .saldo-card {
-  background: var(--primary);
-  color: var(--primary-foreground);
-  padding: 1.5rem;
-  border-radius: var(--radius);
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.saldo-card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: rotate(45deg);
+}
+
+.saldo-card p {
+  font-size: 1rem;
+  margin: 0 0 10px 0;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
 }
 
 .saldo-card h2 {
-  font-size: 2rem;
-  margin: 0.2rem 0;
+  font-size: 3rem;
+  margin: 0 0 10px 0;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
 }
 
+.saldo-card span {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 5px 15px;
+  border-radius: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Section Titles */
+.dashboard-container h3 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin: 30px 0 20px 0;
+  font-weight: 600;
+}
+
+/* Accesos Grid */
 .accesos-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
 }
 
 .acceso-card {
-  background: var(--card);
-  color: var(--card-foreground);
-  padding: 1rem;
-  border-radius: var(--radius);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background: white;
+  border: none;
+  padding: 25px;
+  border-radius: 12px;
   text-align: center;
-  transition: transform 0.2s;
   cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
 }
 
 .acceso-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
 }
 
 .acceso-card span {
-  font-size: 1.5rem;
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 15px;
 }
 
+.acceso-card p {
+  font-size: 1rem;
+  color: #374151;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Transacciones Card */
 .transacciones-card {
-  background: var(--card);
-  padding: 1rem;
-  border-radius: var(--radius);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
 }
 
 .transaccion {
   display: flex;
   justify-content: space-between;
-  padding: 0.7rem 0;
-  border-bottom: 1px solid var(--border);
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .transaccion:last-child {
   border-bottom: none;
 }
 
-.ingreso {
-  color: green;
-  font-weight: bold;
+.transaccion span:first-child {
+  color: #374151;
+  font-weight: 500;
 }
 
-.egreso {
-  color: var(--destructive);
-  font-weight: bold;
+.transaccion span:last-child {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.transaccion .ingreso {
+  color: #059669;
+}
+
+.transaccion .egreso {
+  color: #dc2626;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 15px;
+  }
+
+  .dashboard-container header h1 {
+    font-size: 2rem;
+  }
+
+  .saldo-card h2 {
+    font-size: 2.5rem;
+  }
+
+  .saldo-card {
+    padding: 25px;
+  }
+
+  .accesos-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+  }
+
+  .acceso-card {
+    padding: 20px;
+  }
+
+  .acceso-card span {
+    font-size: 2rem;
+  }
+
+  .transacciones-card {
+    padding: 20px;
+  }
+
+  .transaccion {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  /* Adjusted button size for mobile */
+  .mi-cuenta-btn {
+    padding: 10px 16px;
+    font-size: 0.8rem;
+  }
+
+  /* Adjusted buttons container for mobile */
+  .buttons-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Made second button even smaller on mobile */
+  .mi-cuenta-btn2 {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container header h1 {
+    font-size: 1.8rem;
+  }
+
+  .saldo-card h2 {
+    font-size: 2rem;
+  }
+
+  .accesos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .acceso-card {
+    padding: 15px;
+  }
+
+  .acceso-card span {
+    font-size: 1.8rem;
+  }
+
+  .transacciones-card {
+    padding: 15px;
+  }
+
+  .transaccion {
+    padding: 10px 0;
+  }
+
+  /* Further adjusted button for small screens */
+  .mi-cuenta-btn {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+
+  /* Further reduced second button size for small screens */
+  .mi-cuenta-btn2 {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+  }
 }

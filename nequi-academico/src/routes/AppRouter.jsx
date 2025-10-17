@@ -1,11 +1,13 @@
-// src/routes/AppRouter.jsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Login from "../pages/Auth/Login";
-
-
-
-
+import Register from "../pages/Auth/Register";
+import Simuladores from "../pages/Simuladores/Simuladores";
+import  Prestamos  from "../pages/Prestamos/Prestamos";
+import PrivateRoutes from "../utils/PrivateToutes";
+import HistorialPrestamos from "../pages/Historial/HistorialPrestamos";
+import Recargar_cuenta from "../pages/Recargar/Recargar_cuenta";
+import Perfil from "../pages/Dashboard/Perfil";
 
 const AppRouter = () => {
   return (
@@ -16,12 +18,22 @@ const AppRouter = () => {
         <Route path="/register" element={<Register />} />
 
         {/* Dashboard principal */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoutes>
+              <Dashboard />
+            </PrivateRoutes>
+          }
+        />
 
-      
+        <Route path="/simuladores" element={<Simuladores />} />
+        <Route path="/prestamos" element={<Prestamos />} />
+        <Route path="/historial-prestamos" element={<HistorialPrestamos />} />
+        <Route path="/recargar-saldo" element={<Recargar_cuenta />} />
+        <Route path="/perfil" element={<Perfil/>}></Route>
 
-        {/* Ruta no encontrada */}
-        <Route path="*" element={<h2>Página no encontrada</h2>} />
+
       </Routes>
     </BrowserRouter>
   );

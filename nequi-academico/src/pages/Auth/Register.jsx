@@ -1,31 +1,74 @@
+"use client"
+
 // src/pages/Auth/Register.jsx
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import '../../styles/Register.css';
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import "../../styles/Register.css"
+import { useStoreUsuarios } from "../../supabase/storeUsuarios"
+import Swal from "sweetalert2"
 
 const Register = () => {
   const [form, setForm] = useState({
     cedula: "",
     nombre: "",
     correo: "",
+    telefono: "",
     password: "",
     confirmPassword: "",
-  });
+  })
 
-  const navigate = useNavigate();
+  const { crearUsuario, loading} = useStoreUsuarios()
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const navigate = useNavigate()
 
-  const handleRegister = (e) => {
-    e.preventDefault();
-    if (form.password !== form.confirmPassword) {
-      alert("Las contraseñas no coinciden");
-      return;
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+
+  const handleRegister = async (e) => {
+    e.preventDefault()
+
+    // Validar que ningún campo esté vacío
+    for (const key in form) {
+      if (form[key].trim() === "") {
+        Swal.fire({
+          title: "oops...",
+          text: "Hay Campos Vacíos",
+          icon: "question"
+        });
+        return
+      }
     }
-    alert("Cuenta creada correctamente ✅");
-    navigate("/");
-  };
+
+    if (form.password !== form.confirmPassword) {
+      Swal.fire({
+          title: "oops...",
+          text: "Las contraseñas no coinciden",
+          icon: "question"
+        });
+      return
+    }
+
+    try {
+      await crearUsuario({
+        cedula: form.cedula,
+        nombre: form.nombre,
+        correo: form.correo,
+        telefono: form.telefono,
+        password: form.password,
+      })
+      Swal.fire({
+        title: "Bienvenido a EduBank",
+        icon: "Usuario creado exitosamente",
+        draggable: true
+      });
+      navigate("/")
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Error al crear usuario",
+      });
+    }
+  }
 
   return (
     <div className="register-container">
@@ -34,18 +77,8 @@ const Register = () => {
         <h2>Crear Cuenta</h2>
         <p className="register-subtitle">Únete a EduBank</p>
 
-        <input
-          name="cedula"
-          placeholder="Número de Cédula"
-          value={form.cedula}
-          onChange={handleChange}
-        />
-        <input
-          name="nombre"
-          placeholder="Nombre Completo"
-          value={form.nombre}
-          onChange={handleChange}
-        />
+        <input name="cedula" placeholder="Número de Cédula" value={form.cedula} onChange={handleChange} />
+        <input name="nombre" placeholder="Nombre Completo" value={form.nombre} onChange={handleChange} />
         <input
           name="correo"
           placeholder="Correo Electrónico"
@@ -53,13 +86,8 @@ const Register = () => {
           value={form.correo}
           onChange={handleChange}
         />
-        <input
-          name="password"
-          type="password"
-          placeholder="Contraseña"
-          value={form.password}
-          onChange={handleChange}
-        />
+        <input name="telefono" placeholder="Teléfono" value={form.telefono} onChange={handleChange} />
+        <input name="password" type="password" placeholder="Contraseña" value={form.password} onChange={handleChange} />
         <input
           name="confirmPassword"
           type="password"
@@ -68,14 +96,16 @@ const Register = () => {
           onChange={handleChange}
         />
 
-        <button type="submit">Crear Cuenta</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Creando cuenta..." : "Crear Cuenta"}
+        </button>
 
         <p className="register-links">
           ¿Ya tienes cuenta? <Link to="/">Inicia sesión aquí</Link>
         </p>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register
