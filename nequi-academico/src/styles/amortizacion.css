@@ -1,0 +1,82 @@
+.amortizacion {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.amortizacion h2 {
+  margin-bottom: 1rem;
+}
+
+.amortizacion form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.amortizacion input,
+.amortizacion select {
+  padding: 0.4rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.amortizacion button {
+  padding: 0.4rem 1rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.resultado-amortizacion table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.resultado-amortizacion th,
+.resultado-amortizacion td {
+  border: 1px solid #ccc;
+  padding: 0.4rem;
+  text-align: center;
+}
+
+.resultado-amortizacion th {
+  background: #007bff;
+  color: white;
+}
+
+.resumen {
+  margin-top: 1rem;
+  background: #f9f9f9;
+  padding: 0.6rem;
+  border-radius: 6px;
+}
+
+.form-amort { display:flex; flex-direction:column; gap:0.6rem; max-width:760px; }
+.controls-row { display:flex; gap:1rem; align-items:center; margin-bottom:0.6rem; }
+.controls-row label { min-width:160px; font-weight:600; }
+.row { display:flex; gap:0.6rem; align-items:center; }
+.row label { min-width:160px; font-weight:600; }
+.row input, .row select { padding:0.5rem; border-radius:6px; border:1px solid var(--border); }
+.hint { font-size:0.85rem; color:var(--muted-foreground); margin-left:0.5rem; }
+
+.actions { margin-top:0.6rem; }
+.btn-primary { padding:0.6rem 1rem; border-radius:8px; background:var(--primary); color:var(--primary-foreground); border:none; cursor:pointer; }
+
+.formula-box { background: #fff8ea; padding:0.6rem; border-radius:8px; margin-top:0.8rem; }
+.formula-box pre { white-space:pre-wrap; margin:0; font-size:0.95rem; }
+
+.resultado-amortizacion { margin-top:1rem; background:var(--card); padding:0.8rem; border-radius:8px; }
+.resumen-general p { margin:0.2rem 0; }
+
+.tabla { margin-top:0.8rem; overflow:auto; }
+.tabla table { width:100%; border-collapse:collapse; }
+.tabla th, .tabla td { border:1px solid var(--border); padding:0.45rem; text-align:right; }
+.tabla th:first-child, .tabla td:first-child { text-align:center; width:70px; }
+
+

@@ -6,7 +6,7 @@ import InteresSimple from '../../components/simuladores/IntresSimple'
 import HistorialCalculos from "../../components/simuladores/HistorialCalculos"
 import InteresCompuesto from '../../components/simuladores/InteresCompuestos'
 import SeriesVar from "../../components/simuladores/series_variables"
-import SistemaAmortizacion from "../../components/simuladores/sistema_amortizacion"
+import SistemaAmortizacion  from "../../components/simuladores/sistema_amortizacion";
 import Capitalizacion from "../../components/simuladores/capitalizacion"
 import TIR from "../../components/simuladores/tir"
 import Anualidades from "../../components/simuladores/Anualidades"
@@ -82,8 +82,8 @@ const Simuladores = () => {
         {tab === "tasas" && <TasaInteres agregarAlHistorial={agregarAlHistorial} />}
         {tab === "historial" && <HistorialCalculos historial={historial} />}
         {tab === "series_var" && <SeriesVar/>}
-        {tab === "amortizacion" && <SistemaAmortizacion/>}
-        {tab === "capitalizacion" && <Capitalizacion/>}
+        {tab === "amortizacion" && <SistemaAmortizacion agregarAlHistorial={agregarAlHistorial}/>}
+        {tab === "capitalizacion" && <Capitalizacion agregarAlHistorial={agregarAlHistorial}/>}
         {tab === "tasa_retorno" && <TIR/>}
       </div>
     </div>
