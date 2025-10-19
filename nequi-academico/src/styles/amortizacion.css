@@ -79,4 +79,85 @@
 .tabla th, .tabla td { border:1px solid var(--border); padding:0.45rem; text-align:right; }
 .tabla th:first-child, .tabla td:first-child { text-align:center; width:70px; }
 
+/* 🔹 Subfila de conversión de tiempo */
+.sub-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 8px;
+}
+
+.sub-row input {
+  flex: 1 1 90px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  text-align: center;
+  background-color: #fafafa;
+  transition: border 0.3s, background 0.3s;
+}
+
+.sub-row input:focus {
+  border-color: #007bff;
+  background-color: #fff;
+  outline: none;
+}
+
+/* 🔹 Botón secundario estilo igual al principal */
+.btn-secondary {
+  padding: 8px 12px;
+  border: 1px solid #007bff;
+  border-radius: 6px;
+  background-color: white;
+  color: #007bff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* 🔹 Responsive: inputs y botones se ajustan */
+@media (max-width: 768px) {
+  .sub-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sub-row input {
+    width: 100%;
+    text-align: left;
+  }
+
+  .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* 🔹 Ajustes de consistencia con el resto del formulario */
+.row label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.row input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.row small {
+  color: #777;
+  font-size: 0.85rem;
+}
+
 

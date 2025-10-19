@@ -8,7 +8,7 @@ import "../../styles/amortizacion.css"; // usamos los mismos estilos del módulo
 
 const formatCurrency = (v) =>
   Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const formatPct = (v) => (v * 100).toFixed(8) + " %";
+const formatPct = (v) => (v * 100).toFixed(2) + " %";
 
 const Capitalizacion = ({ agregarAlHistorial }) => {
   const [tipo, setTipo] = useState("simple");
@@ -35,7 +35,7 @@ const Capitalizacion = ({ agregarAlHistorial }) => {
       i = res.i;
       setFormula("M = P × (1 + i × n)");
       setSustitucion(
-        `Sustitución: ${capital} × (1 + ${i.toFixed(8)} × ${n}) = ${M.toFixed(2)}`
+        `Sustitución: ${capital} × (1 + ${i.toFixed(2)} × ${n}) = ${M.toFixed(2)}`
       );
     } else {
       res = calcularCapitalizacionCompuesta(capital, tasa, unidadSeleccionada, n);
@@ -44,7 +44,7 @@ const Capitalizacion = ({ agregarAlHistorial }) => {
       i = res.i;
       setFormula("M = P × (1 + i)^n");
       setSustitucion(
-        `Sustitución: ${capital} × (1 + ${i.toFixed(8)})^${n} = ${M.toFixed(2)}`
+        `Sustitución: ${capital} × (1 + ${i.toFixed(2)})^${n} = ${M.toFixed(2)}`
       );
     }
 
