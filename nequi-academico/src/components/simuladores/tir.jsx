@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import "../../../src/styles/simuladores.css"
+import "../../../src/styles/simuladores.css";
+
+import tir_img from "../../utils/img/TIR.png";
+import tir2 from "../../utils/img/tir2.png";
 
 const TIR = () => {
   const [inversion, setInversion] = useState("");
@@ -8,6 +11,7 @@ const TIR = () => {
   const [flujos, setFlujos] = useState([]);
   const [resultado, setResultado] = useState(null);
   const [error, setError] = useState("");
+  const [formula, setFormula] = useState("");
 
   // Genera los campos dinámicos para los flujos
   const generarFlujos = () => {
@@ -25,7 +29,7 @@ const TIR = () => {
     setFlujos(nuevos);
   };
 
-  // Cálculo de la TIR mediante método iterativo
+  // Cálculo de la TIR mediante método iterativo (Newton-Raphson)
   const calcularTIR = () => {
     if (flujos.some(f => f === "") || inversion === "") {
       setError("Todos los campos deben estar completos.");
@@ -51,11 +55,21 @@ const TIR = () => {
 
     setResultado((tir * 100).toFixed(4));
     setError("");
+
+    // Generar representación de la fórmula final
+    const partes = flujosNum
+      .map((f, i) => `${f}/(1+${tir.toFixed(4)})^${i + 1}`)
+      .join(" + ");
+
+    const formulaFinal = `0 = -${inversionInicial} + ${partes}`;
+    setFormula(formulaFinal);
   };
 
   return (
     <div className="calculadora-container simulador-tir">
       <h2>Simulador de Tasa Interna de Retorno (TIR)</h2>
+      <img src={tir_img} alt="" />
+      <img src={tir2} alt="" />
 
       <div className="formulario">
         <div className="input-group">
@@ -113,12 +127,25 @@ const TIR = () => {
         </div>
       )}
 
-      {error && <p className="error" style={{ color: "var(--danger-color)", fontWeight: "600" }}>{error}</p>}
+      {error && (
+        <p className="error" style={{ color: "var(--danger-color)", fontWeight: "600" }}>
+          {error}
+        </p>
+      )}
 
       {resultado && (
         <div className="resultado">
           <div className="valor-resultado">{resultado}%</div>
           <p>TIR {unidad === "años" ? "anual" : "mensual"} estimada</p>
+
+          {formula && (
+            <div className="formula-box">
+              <h4>Fórmula utilizada:</h4>
+              <p style={{ fontFamily: "monospace", fontSize: "1.1em", background: "#f6f6f6", padding: "10px", borderRadius: "8px" }}>
+                {formula}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
