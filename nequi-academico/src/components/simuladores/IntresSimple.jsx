@@ -1,316 +1,227 @@
-"use client"
+import React, { useState, useRef } from "react";
+import { tasaPorPeriodo } from "../../utils/amortizacion";
+import "../../styles/amortizacion.css";
 
-import { useState } from "react"
+const formatCurrency = (v) =>
+  Number(v).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+const formatPct = (v) => (v * 100).toFixed(2) + " %";
 
 const InteresSimple = ({ agregarAlHistorial }) => {
-  const [resultado, setResultado] = useState(null)
-  const [error, setError] = useState("")
+  const [unidad, setUnidad] = useState("mensual");
+  const [tipoCalculo, setTipoCalculo] = useState("monto");
+  const [resultado, setResultado] = useState(null);
+  const [formula, setFormula] = useState("");
+  const [sustitucion, setSustitucion] = useState("");
+  const inputPeriodos = useRef(null);
 
-  const convertirTiempoAAnios = (años, meses, dias) => {
-    const añosTotal = (años || 0) + (meses || 0) / 12 + (dias || 0) / 365
-    return añosTotal
-  }
+  // 🔹 Conversión de tiempo a periodos decimales
+  const convertirTiempo = () => {
+    const años = parseFloat(document.getElementById("anios").value) || 0;
+    const meses = parseFloat(document.getElementById("meses").value) || 0;
+    const dias = parseFloat(document.getElementById("dias").value) || 0;
 
-  const convertirTasaAAnual = (tasa, unidad) => {
-    // tasa: número en la unidad seleccionada (ej: 1.5 si el usuario escribe 1.5)
+    let total = 0;
     switch (unidad) {
+      case "anual":
+        total = años + meses / 12 + dias / 360;
+        break;
       case "mensual":
-        return tasa * 12
+        total = años * 12 + meses + dias / 30;
+        break;
       case "trimestral":
-        return tasa * 4
+        total = años * 4 + meses / 3 + dias / 90;
+        break;
       case "diaria":
-        return tasa * 365
+        total = años * 360 + meses * 30 + dias;
+        break;
       default:
-        return tasa // anual
-    }
-  }
-
-  // const parseNumberOrNull = (value) => {
-  //   if (value === undefined || value === null) return null
-  //   const trimmed = String(value).trim()
-  //   if (trimmed === "") return null
-  //   const n = Number(trimmed)
-  //   return Number.isFinite(n) ? n : null
-  // }
-
-
-  //NUEVA 
-  const parseNumberOrNull = (value) => {
-    if (value === undefined || value === null) return null
-    let s = String(value).trim()
-
-    if (s === "") return null
-
-    // quitar símbolos monetarios y espacios (ej "€", "$", "COP", " ")
-    s = s.replace(/[^\d.,-]/g, "")
-
-    // si se tiene tanto '.' como ',' -> asumimos formato europeo: puntos = miles, coma = decimal
-    if (s.includes(".") && s.includes(",")) {
-      s = s.replace(/\./g, "") // quitar miles
-      s = s.replace(",", ".") // coma -> punto decimal
-      const n = Number(s)
-      return Number.isFinite(n) ? n : null
+        total = años + meses / 12 + dias / 360;
     }
 
-    // solo contiene ',' -> asumimos coma decimal (ej "1234,56")
-    if (s.includes(",") && !s.includes(".")) {
-      s = s.replace(",", ".")
-      const n = Number(s)
-      return Number.isFinite(n) ? n : null
-    }
+    if (inputPeriodos.current) inputPeriodos.current.value = total.toFixed(4);
+  };
 
-    // solo contiene '.' -> puede ser decimal ("1234.56") o miles ("1.234")
-    if (s.includes(".") && !s.includes(",")) {
-      // si hay puntos seguidos de exactamente 3 dígitos (p. ej "1.234" o "12.345.678") => tratamos '.' como separador de miles
-      if (/\.\d{3}(?:\.|$)/.test(s)) {
-        s = s.replace(/\./g, "")
-        const n = Number(s)
-        return Number.isFinite(n) ? n : null
-      }
-      // si no, tratamos '.' como separador decimal
-      const n = Number(s)
-      return Number.isFinite(n) ? n : null
-    }
+  const handleCalcular = (e) => {
+    e.preventDefault();
+    const fm = new FormData(e.target);
+    const data = Object.fromEntries(fm.entries());
 
-    // solo dígitos (positivo/negativo)
-    const n = Number(s)
-    return Number.isFinite(n) ? n : null
-  }
+    const capital = parseFloat(data.capital) || 0;
+    const monto = parseFloat(data.monto) || 0;
+    const tasa = parseFloat(data.tasa) || 0;
+    const n = parseFloat(data.periodos) || 0;
+    const interes = parseFloat(data.interes) || 0;
 
+    const i = tasaPorPeriodo(tasa, unidad, unidad);
+    let resultadoCalculo = {};
+    let formulaUsada = "";
+    let sustitucionTexto = "";
 
-
-  const calcular = (e) => {
-    e.preventDefault()
-    setError("")
-
-    const form = new FormData(e.target)
-    const data = Object.fromEntries(form.entries())
-
-    // Parse robustamente
-    const capital = parseNumberOrNull(data.capital)
-    const monto = parseNumberOrNull(data.monto)
-    const tasaInput = parseNumberOrNull(data.tasa) // puede quedar null si el usuario no la puso
-    const años = parseNumberOrNull(data.años) || 0
-    const meses = parseNumberOrNull(data.meses) || 0
-    const dias = parseNumberOrNull(data.dias) || 0
-
-    // Detectar cuál(es) faltan
-    const faltantes = []
-    if (capital === null) faltantes.push("capital")
-    if (monto === null) faltantes.push("monto")
-    if (tasaInput === null) faltantes.push("tasa")
-
-    const tiempoIngresado = años > 0 || meses > 0 || dias > 0
-    if (!tiempoIngresado) faltantes.push("tiempo")
-
-    if (faltantes.length !== 1) {
-      setError("Debes llenar exactamente 3 campos y dejar 1 vacío para calcular")
-      return
-    }
-
-    const tiempoEnAnios = convertirTiempoAAnios(años, meses, dias)
-
-    let res = null
-    let unidadMostrar = ""
-    let modo = ""
-    try {
-      const unidadTasa = data.unidadTasa || "anual"
-
-      if (faltantes[0] === "monto") {
-        // monto = C * (1 + i_anual * t)
-        if (capital === null || tasaInput === null) {
-          setError("Faltan datos para calcular el monto")
-          return
-        }
-        const tasaAnual = convertirTasaAAnual(tasaInput, unidadTasa) // % anual
-        res = capital * (1 + (tasaAnual / 100) * tiempoEnAnios)
-        unidadMostrar = "COP"
-        modo = "Monto Futuro"
-      } else if (faltantes[0] === "capital") {
-        // C = monto / (1 + i_anual * t)
-        if (monto === null || tasaInput === null) {
-          setError("Faltan datos para calcular el capital")
-          return
-        }
-        const tasaAnual = convertirTasaAAnual(tasaInput, unidadTasa) // % anual
-        res = monto / (1 + (tasaAnual / 100) * tiempoEnAnios)
-        unidadMostrar = "COP"
-        modo = "Capital Inicial"
-      } else if (faltantes[0] === "tasa") {
-        // calcular tasa: i_anual = (monto - capital) / (capital * t)  -> en porcentaje
-        if (capital === null || monto === null) {
-          setError("Faltan datos para calcular la tasa")
-          return
-        }
-        if (tiempoEnAnios === 0) {
-          setError("El tiempo debe ser mayor a 0 para calcular la tasa")
-          return
-        }
-
-        const tasaAnualPorc = ((monto - capital) / (capital * tiempoEnAnios)) * 100 // % anual
-        // Convertir a la unidad pedida para mostrar (ej mensual = anual/12)
-        let tasaEnUnidad = tasaAnualPorc
-        switch (unidadTasa) {
-          case "mensual":
-            tasaEnUnidad = tasaAnualPorc / 12
-            break
-          case "trimestral":
-            tasaEnUnidad = tasaAnualPorc / 4
-            break
-          case "diaria":
-            tasaEnUnidad = tasaAnualPorc / 365
-            break
-          // anual -> se mantiene
-        }
-
-        res = tasaEnUnidad // valor numérico en la unidad elegida
-        unidadMostrar = unidadTasa
-        modo = "Tasa de Interés"
-      } else if (faltantes[0] === "tiempo") {
-        // t = (monto - capital) / (capital * i_anual)
-        if (capital === null || monto === null || tasaInput === null) {
-          setError("Faltan datos para calcular el tiempo")
-          return
-        }
-        const tasaAnual = convertirTasaAAnual(tasaInput, data.unidadTasa)
-        if (tasaAnual === 0) {
-          setError("La tasa debe ser mayor a 0 para calcular el tiempo")
-          return
-        }
-        res = (monto - capital) / (capital * (tasaAnual / 100))
-        unidadMostrar = "años"
-        modo = "Tiempo"
+    switch (tipoCalculo) {
+      case "monto": {
+        const M = capital * (1 + i * n);
+        const I = M - capital;
+        formulaUsada = "M = P × (1 + i × n)";
+        sustitucionTexto = `${capital} × (1 + ${i.toFixed(2)} × ${n}) = ${M.toFixed(2)}`;
+        resultadoCalculo = { M, I, i, n, P: capital };
+        break;
       }
 
-      // Registro para historial (string friendly)
-      const registro = {
-        categoria: "Interés Simple",
-        modo,
-        variables: {
-          capital: capital ?? (faltantes[0] === "capital" ? res : capital),
-          monto: monto ?? (faltantes[0] === "monto" ? res : monto),
-          tasa:
-            faltantes[0] === "tasa"
-              ? `${res.toFixed(6)} % ${unidadMostrar} (≈ ${(
-                  convertirTasaAAnual(res, unidadMostrar) || 0
-                ).toFixed(2)} % anual)`
-              : `${tasaInput ?? 0} % ${data.unidadTasa}`,
-          tiempo: faltantes[0] === "tiempo" ? `${res.toFixed(2)} años` : `${años || 0}a ${meses || 0}m ${dias || 0}d`,
-        },
-        resultado: res,
-        unidad: unidadMostrar,
-        fecha: new Date().toLocaleString(),
+      case "capital": {
+        const P = monto / (1 + i * n);
+        const I = monto - P;
+        formulaUsada = "P = M / (1 + i × n)";
+        sustitucionTexto = `${monto} / (1 + ${i.toFixed(2)} × ${n}) = ${P.toFixed(2)}`;
+        resultadoCalculo = { P, I, i, n, M: monto };
+        break;
       }
 
-      // Preparar el objeto resultado para la UI
-      // Si calculamos tasa, 'res' está en la unidad elegida (mensual/trimestral/diaria/anual)
-      let tasaParaMostrar = null
-      if (faltantes[0] === "tasa") {
-        tasaParaMostrar = res
-      } else {
-        // si no calculamos la tasa, mostramos la tasa como número en la unidad seleccionada
-        tasaParaMostrar = tasaInput
+      case "tasa": {
+        const iCalculado = (monto - capital) / (capital * n);
+        const tasaPorcentaje = iCalculado * 100;
+        formulaUsada = "i = (M - P) / (P × n)";
+        sustitucionTexto = `(${monto} - ${capital}) / (${capital} × ${n}) = ${iCalculado.toFixed(2)}`;
+        resultadoCalculo = { i: iCalculado, tasaPorcentaje, n, M: monto, P: capital };
+        break;
       }
 
-      setResultado({
-        valor: res,
-        unidad: unidadMostrar,
-        modo,
-        capital: capital ?? (faltantes[0] === "capital" ? res : capital),
-        monto: monto ?? (faltantes[0] === "monto" ? res : monto),
-        tasa: tasaParaMostrar,
-        tiempo: faltantes[0] === "tiempo" ? res : tiempoEnAnios,
-        unidadTasa: data.unidadTasa,
-      })
+      case "tiempo": {
+        const nCalculado = (monto / capital - 1) / i;
+        formulaUsada = "n = (M / P - 1) / i";
+        sustitucionTexto = `(${monto} / ${capital} - 1) / ${i.toFixed(2)} = ${nCalculado.toFixed(2)}`;
+        resultadoCalculo = { n: nCalculado, i, M: monto, P: capital };
+        break;
+      }
 
-      if (typeof agregarAlHistorial === "function") agregarAlHistorial(registro)
-    } catch (err) {
-      console.log("[v1] Error en cálculo:", err)
-      setError("Error en el cálculo. Verifica los valores ingresados.")
+      case "capital_interes": {
+        const P = interes / (i * n);
+        formulaUsada = "P = I / (i × n)";
+        sustitucionTexto = `${interes} / (${i.toFixed(2)} × ${n}) = ${P.toFixed(2)}`;
+        resultadoCalculo = { P, i, n, I: interes };
+        break;
+      }
+
+      default:
+        break;
     }
-  }
+
+    const registro = {
+      categoria: "Interés Simple",
+      tipoCalculo,
+      variables: { capital, monto, tasa, unidad, periodos: n, interes },
+      resultado: resultadoCalculo,
+      formula: formulaUsada,
+      sustitucion: sustitucionTexto,
+      fecha: new Date().toLocaleString(),
+    };
+
+    if (typeof agregarAlHistorial === "function") agregarAlHistorial(registro);
+    setFormula(formulaUsada);
+    setSustitucion(sustitucionTexto);
+    setResultado(registro);
+    e.target.reset();
+  };
 
   return (
-    <div>
-      <h2>Interés Simple</h2>
-      <p className="descripcion">
-        Completa 3 campos y deja 1 vacío. El sistema calculará automáticamente el valor faltante.
-      </p>
+    <div className="amortizacion">
+      <h2>Interés Simple — Calculadora Completa</h2>
 
-      <form onSubmit={calcular} className="formulario">
-        <div className="input-group">
-          <label>Capital Inicial (C)</label>
-          <input name="capital" type="number" placeholder="Ej: 1000000" step="0.01" />
-        </div>
+      <div className="controls-row">
+        <label>Tipo de Cálculo:</label>
+        <select value={tipoCalculo} onChange={(e) => setTipoCalculo(e.target.value)}>
+          <option value="monto">Monto Futuro (M)</option>
+          <option value="capital">Capital Inicial (P)</option>
+          <option value="tasa">Tasa de Interés (i)</option>
+          <option value="tiempo">Tiempo (n)</option>
+          <option value="capital_interes">Capital a partir del Interés (I)</option>
+        </select>
 
-        <div className="input-group">
-          <label>Monto Futuro (VF)</label>
-          <input name="monto" type="number" placeholder="Ej: 1200000" step="0.01" />
-        </div>
+        <label>Unidad:</label>
+        <select value={unidad} onChange={(e) => setUnidad(e.target.value)}>
+          <option value="mensual">Mensual</option>
+          <option value="anual">Anual</option>
+          <option value="trimestral">Trimestral</option>
+          <option value="diaria">Diaria</option>
+        </select>
+      </div>
 
-        <div className="input-group">
-          <label>Tasa de Interés</label>
-          <div className="input-with-select">
-            <input name="tasa" type="number" placeholder="Ej: 12" step="0.000001" />
-            <select name="unidadTasa" defaultValue="anual">
-              <option value="anual">% Anual</option>
-              <option value="mensual">% Mensual</option>
-              <option value="trimestral">% Trimestral</option>
-              <option value="diaria">% Diaria</option>
-            </select>
+      <form onSubmit={handleCalcular} className="form-amort">
+        {tipoCalculo !== "capital" && tipoCalculo !== "capital_interes" && (
+          <div className="row">
+            <label>Capital Inicial (P)</label>
+            <input name="capital" type="number" step="0.01" placeholder="Ej: 15000" required />
           </div>
-        </div>
+        )}
 
-        <div className="input-group">
-          <label>Tiempo</label>
-          <div className="tiempo-group">
-            <input name="años" type="number" placeholder="Años" min="0" />
-            <input name="meses" type="number" placeholder="Meses" min="0" max="11" />
-            <input name="dias" type="number" placeholder="Días" min="0" max="30" />
+        {(tipoCalculo === "capital" || tipoCalculo === "tasa" || tipoCalculo === "tiempo") && (
+          <div className="row">
+            <label>Monto Futuro (M)</label>
+            <input name="monto" type="number" step="0.01" placeholder="Ej: 18000" required />
           </div>
-        </div>
+        )}
 
-        <button type="submit">Calcular Automáticamente</button>
+        {tipoCalculo === "capital_interes" && (
+          <div className="row">
+            <label>Interés Total (I)</label>
+            <input name="interes" type="number" step="0.01" placeholder="Ej: 3000" required />
+          </div>
+        )}
+
+        {tipoCalculo !== "tasa" && (
+          <div className="row">
+            <label>Tasa de Interés ({unidad})</label>
+            <input name="tasa" type="number" step="0.0001" placeholder="Ej: 8 (para 8%)" required />
+          </div>
+        )}
+
+        {tipoCalculo !== "tiempo" && (
+          <div className="row">
+            <label>Número de Periodos (n)</label>
+            <input ref={inputPeriodos} name="periodos" type="number" step="0.0001" placeholder="Ej: 12 (según unidad)" required />
+
+            {/* 🔹 Conversor de tiempo */}
+            <div className="sub-row">
+              <input id="anios" type="number" placeholder="Años" min="0" style={{ width: "80px" }} />
+              <input id="meses" type="number" placeholder="Meses" min="0" style={{ width: "80px" }} />
+              <input id="dias" type="number" placeholder="Días" min="0" style={{ width: "80px" }} />
+              <button type="button" onClick={convertirTiempo} className="btn-secondary">
+                Convertir tiempo a periodos
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="actions">
+          <button type="submit" className="btn-primary">Calcular</button>
+        </div>
       </form>
 
-      {error && (
-        <div className="error">
-          <p>{error}</p>
+      {formula && (
+        <div className="formula-box">
+          <h4>Fórmula utilizada</h4>
+          <pre>{formula}</pre>
+          <h4>Sustitución</h4>
+          <pre>{sustitucion}</pre>
         </div>
       )}
 
       {resultado && (
-        <div className="resultado">
-          <h3>
-            {resultado.modo}: {Number(resultado.valor).toFixed(2)} {resultado.unidad === "COP" ? "COP" : resultado.unidad}
-          </h3>
-          <div className="detalles">
-            <p>
-              <strong>Capital:</strong> ${Number(resultado.capital || 0).toFixed(2)} COP
-            </p>
-            <p>
-              <strong>Monto Futuro:</strong> ${Number(resultado.monto || 0).toFixed(2)} COP
-            </p>
-            <p>
-              <strong>Tasa:</strong>{" "}
-              {resultado.tasa !== null && resultado.tasa !== undefined
-                ? `${Number(resultado.tasa).toFixed(6)} % ${resultado.unidadTasa}`
-                : "—"}
-              {resultado.unidadTasa !== "anual" && resultado.unidadTasa
-                ? ` (≈ ${Number(convertirTasaAAnual(resultado.tasa || 0, resultado.unidadTasa)).toFixed(6)} % anual)`
-                : ""}
-            </p>
-            <p>
-              <strong>Tiempo:</strong> {Number(resultado.tiempo).toFixed(1)} años
-            </p>
-            <p>
-              <strong>Interés Ganado:</strong> ${Number((resultado.monto || 0) - (resultado.capital || 0)).toFixed(2)} COP
-            </p>
+        <div className="resultado-amortizacion">
+          <h3>Resultado — {tipoCalculo.toUpperCase()}</h3>
+          <div className="resumen-general">
+            {resultado.resultado.M && <p><strong>Monto (M):</strong> {formatCurrency(resultado.resultado.M)} COP</p>}
+            {resultado.resultado.P && <p><strong>Capital (P):</strong> {formatCurrency(resultado.resultado.P)} COP</p>}
+            {resultado.resultado.I && <p><strong>Interés (I):</strong> {formatCurrency(resultado.resultado.I)} COP</p>}
+            {resultado.resultado.i && <p><strong>Tasa (i):</strong> {formatPct(resultado.resultado.i)}</p>}
+            {resultado.resultado.n && <p><strong>Tiempo (n):</strong> {resultado.resultado.n.toFixed(2)} {unidad}</p>}
           </div>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default InteresSimple
+export default InteresSimple;

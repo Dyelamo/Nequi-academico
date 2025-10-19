@@ -1,306 +1,222 @@
-"use client";
+import React, { useState } from "react";
+import "../../styles/amortizacion.css";
 
-import { useState } from "react";
+// Función para formatear porcentaje
+const formatPct = (v) => (v * 100).toFixed(4) + " %";
+
+// Conversión entre periodos (frecuencias)
+const periodosPorUnidad = {
+  anual: 1,
+  semestral: 2,
+  trimestral: 4,
+  bimestral: 6,
+  mensual: 12,
+  diaria: 360,
+};
+
+// Conversión de tasas nominal ↔ efectiva
+const convertirTasa = (valor, tipo, origen, destino) => {
+  const nOrigen = periodosPorUnidad[origen];
+  const nDestino = periodosPorUnidad[destino];
+  const i = valor / 100;
+
+  let resultado = 0;
+
+  if (tipo === "nominal_a_efectiva") {
+    // Efectiva = (1 + i/n)^n - 1
+    resultado = Math.pow(1 + i / nOrigen, nOrigen / nDestino) - 1;
+  } else if (tipo === "efectiva_a_nominal") {
+    // Nominal = n * ((1 + i)^(1/n) - 1)
+    resultado = nDestino * (Math.pow(1 + i, 1 / (nDestino / nOrigen)) - 1);
+  } else if (tipo === "efectiva_a_efectiva") {
+    // Cambiar de una efectiva a otra (e.g., anual a mensual)
+    resultado = Math.pow(1 + i, nOrigen / nDestino) - 1;
+  } else if (tipo === "nominal_a_nominal") {
+    // Cambiar entre nominales (manteniendo base efectiva)
+    const iEfectiva = Math.pow(1 + i / nOrigen, nOrigen) - 1;
+    resultado = nDestino * (Math.pow(1 + iEfectiva, 1 / nDestino) - 1);
+  }
+
+  return resultado;
+};
 
 const TasaInteres = ({ agregarAlHistorial }) => {
+  const [tipoConversion, setTipoConversion] = useState("nominal_a_efectiva");
+  const [unidadOrigen, setUnidadOrigen] = useState("anual");
+  const [unidadDestino, setUnidadDestino] = useState("mensual");
   const [resultado, setResultado] = useState(null);
-  const [error, setError] = useState("");
+  const [formula, setFormula] = useState("");
+  const [sustitucion, setSustitucion] = useState("");
 
-  const calcular = (e) => {
+  const handleCalcular = (e) => {
     e.preventDefault();
-    setError("");
+    const fm = new FormData(e.target);
+    const data = Object.fromEntries(fm.entries());
+    const tasa = parseFloat(data.tasa) || 0;
 
-    const form = new FormData(e.target);
-    const data = Object.fromEntries(form.entries());
+    const iConvertida = convertirTasa(
+      tasa,
+      tipoConversion,
+      unidadOrigen,
+      unidadDestino
+    );
 
-    const tasaNominal = data.tasaNominal
-      ? Number.parseFloat(data.tasaNominal)
-      : null;
-    const tasaEfectiva = data.tasaEfectiva
-      ? Number.parseFloat(data.tasaEfectiva)
-      : null;
-    const periodos = data.periodos ? Number.parseFloat(data.periodos) : null;
+    let formulaUsada = "";
+    let sustitucionTexto = "";
 
-    // Contar campos vacíos
-    const camposVacios = [];
-    if (!tasaNominal) camposVacios.push("tasaNominal");
-    if (!tasaEfectiva) camposVacios.push("tasaEfectiva");
-    if (!periodos) camposVacios.push("periodos");
+    switch (tipoConversion) {
+      case "nominal_a_efectiva":
+        formulaUsada = "i_e = (1 + i_nom / m)^m - 1";
+        sustitucionTexto = `(1 + ${tasa / 100} / ${
+          periodosPorUnidad[unidadOrigen]
+        })^${periodosPorUnidad[unidadOrigen]} - 1 = ${iConvertida.toFixed(2)}`;
+        break;
 
-    // Validar que exactamente un campo esté vacío
-    if (camposVacios.length === 0) {
-      setError("Deja vacío el campo que deseas calcular");
-      return;
-    }
-    if (camposVacios.length > 1) {
-      setError("Completa más campos. Solo deja vacío el que deseas calcular");
-      return;
-    }
+      case "efectiva_a_nominal":
+        formulaUsada = "i_nom = m × ((1 + i_e)^(1/m) - 1)";
+        sustitucionTexto = `${periodosPorUnidad[unidadDestino]} × ((1 + ${
+          tasa / 100
+        })^(1/${periodosPorUnidad[unidadDestino]}) - 1) = ${iConvertida.toFixed(
+          2
+        )}`;
+        break;
 
-    // Validar valores positivos para campos completados
-    if (tasaNominal !== null && tasaNominal <= 0) {
-      setError("La tasa nominal debe ser mayor a 0");
-      return;
-    }
-    if (tasaEfectiva !== null && tasaEfectiva <= 0) {
-      setError("La tasa efectiva debe ser mayor a 0");
-      return;
-    }
-    if (periodos !== null && periodos <= 0) {
-      setError("Los períodos deben ser mayor a 0");
-      return;
-    }
+      case "efectiva_a_efectiva":
+        formulaUsada = "i_destino = (1 + i_origen)^(m_origen / m_destino) - 1";
+        sustitucionTexto = `(1 + ${tasa / 100})^(${
+          periodosPorUnidad[unidadOrigen]
+        } / ${periodosPorUnidad[unidadDestino]}) - 1 = ${iConvertida.toFixed(
+          2
+        )}`;
+        break;
 
-    let res = null;
-    const unidad = "%";
-    let descripcion = "";
-    let formula = "";
-    let tipoCalculo = "";
+      case "nominal_a_nominal":
+        formulaUsada =
+          "i_destino = m_destino × ((1 + i_nom/m_origen)^(m_origen/m_destino) - 1)";
+        sustitucionTexto = `${periodosPorUnidad[unidadDestino]} × ((1 + ${
+          tasa / 100
+        } / ${periodosPorUnidad[unidadOrigen]})^(${
+          periodosPorUnidad[unidadOrigen]
+        }/${periodosPorUnidad[unidadDestino]}) - 1) = ${iConvertida.toFixed(2)}`;
+        break;
 
-    try {
-      const campoACalcular = camposVacios[0];
-
-      switch (campoACalcular) {
-        case "tasaEfectiva":
-          // Calcular Tasa Efectiva desde Nominal
-          // Tasa Efectiva = (1 + i/n)^n - 1
-          res =
-            (Math.pow(1 + tasaNominal / 100 / periodos, periodos) - 1) * 100;
-          descripcion = "Tasa Efectiva Anual";
-          formula = `(1 + ${tasaNominal}%/${periodos})^${periodos} - 1`;
-          tipoCalculo = "nominal_efectiva";
-          break;
-
-        case "tasaNominal":
-          // Calcular Tasa Nominal desde Efectiva
-          // Tasa Nominal = n * ((1 + i_efectiva)^(1/n) - 1)
-          res =
-            periodos *
-            (Math.pow(1 + tasaEfectiva / 100, 1 / periodos) - 1) *
-            100;
-          descripcion = "Tasa Nominal Anual";
-          formula = `${periodos} × ((1 + ${tasaEfectiva}%)^(1/${periodos}) - 1)`;
-          tipoCalculo = "efectiva_nominal";
-          break;
-
-        case "periodos": // Calcular Períodos desde tasas conocidas
-        // n = ln(1 + i_efectiva) / ln(1 + i_nominal/100)
-        {
-          if (tasaNominal <= 0) {
-            setError(
-              "La tasa nominal debe ser mayor a 0 para calcular períodos"
-            );
-            return;
-          }
-          const tasaNominalDecimal = tasaNominal / 100;
-          const tasaEfectivaDecimal = tasaEfectiva / 100;
-
-          if (tasaEfectivaDecimal <= tasaNominalDecimal) {
-            setError(
-              "La tasa efectiva debe ser mayor que la nominal para calcular períodos"
-            );
-            return;
-          }
-
-          res =
-            Math.log(1 + tasaEfectivaDecimal) /
-            Math.log(1 + tasaNominalDecimal);
-          descripcion = "Períodos de Capitalización";
-          formula = `ln(1 + ${tasaEfectiva}%) / ln(1 + ${tasaNominal}%)`;
-          tipoCalculo = "calcular_periodos";
-          break;
-        }
-
-        default:
-          setError("Campo a calcular no reconocido");
-          return;
-      }
-
-      if (res === null || !isFinite(res) || isNaN(res)) {
-        setError("Error en el cálculo. Verifica que los valores sean válidos.");
-        return;
-      }
-
-      const registro = {
-        categoria: "Tasas de Interés",
-        modo: descripcion,
-        variables: {
-          tipoCalculo,
-          tasaNominal: tasaNominal || res.toFixed(6),
-          tasaEfectiva: tasaEfectiva || res.toFixed(6),
-          periodos: periodos || res.toFixed(2),
-        },
-        resultado: res,
-        unidad: campoACalcular === "periodos" ? "períodos" : unidad,
-        fecha: new Date().toLocaleString(),
-      };
-
-      setResultado({
-        valor: res,
-        unidad: campoACalcular === "periodos" ? "períodos" : unidad,
-        descripcion,
-        formula,
-        tasaNominal: tasaNominal || res,
-        tasaEfectiva: tasaEfectiva || res,
-        periodos: periodos || res,
-        tipoCalculo,
-        campoCalculado: campoACalcular,
-      });
-
-      agregarAlHistorial(registro);
-    } catch (error) {
-      setError(
-        "Error en el cálculo. Verifica los valores ingresados." + error.message
-      );
-    }
-  };
-
-  const getPeriodicidadNombre = (valor) => {
-    const num = Number(valor);
-    switch (num) {
-      case 365:
-        return "diaria";
-      case 12:
-        return "mensual";
-      case 4:
-        return "trimestral";
-      case 2:
-        return "semestral";
-      case 1:
-        return "anual";
       default:
-        return `cada ${valor} períodos`;
+        formulaUsada = "No se reconoce el tipo de conversión.";
     }
+
+    const registro = {
+      categoria: "Tasa de Interés",
+      tipoConversion,
+      variables: {
+        tasa,
+        unidadOrigen,
+        unidadDestino,
+      },
+      resultado: { iConvertida },
+      formula: formulaUsada,
+      sustitucion: sustitucionTexto,
+      fecha: new Date().toLocaleString(),
+    };
+
+    if (typeof agregarAlHistorial === "function") agregarAlHistorial(registro);
+
+    setFormula(formulaUsada);
+    setSustitucion(sustitucionTexto);
+    setResultado({
+      valor: iConvertida,
+      unidadDestino,
+    });
+
+    e.target.reset();
   };
 
   return (
-    <div className="calculadora-container">
-      <h2>Tasas de Interés</h2>
+    <div className="amortizacion">
+      <h2>Conversión de Tasas de Interés</h2>
 
-      <div className="instrucciones">
-        <p>
-          Completa los campos que conoces y deja vacío el que deseas calcular
-        </p>
+      <div className="controls-row">
+        <label>Tipo de Conversión</label>
+        <select
+          value={tipoConversion}
+          onChange={(e) => setTipoConversion(e.target.value)}
+        >
+          <option value="nominal_a_efectiva">
+            Nominal → Efectiva
+          </option>
+          <option value="efectiva_a_nominal">
+            Efectiva → Nominal
+          </option>
+          <option value="efectiva_a_efectiva">
+            Efectiva → Efectiva
+          </option>
+          <option value="nominal_a_nominal">
+            Nominal → Nominal
+          </option>
+        </select>
+
+        <label>Unidad Origen</label>
+        <select
+          value={unidadOrigen}
+          onChange={(e) => setUnidadOrigen(e.target.value)}
+        >
+          {Object.keys(periodosPorUnidad).map((u) => (
+            <option key={u} value={u}>
+              {u.charAt(0).toUpperCase() + u.slice(1)}
+            </option>
+          ))}
+        </select>
+
+        <label>Unidad Destino</label>
+        <select
+          value={unidadDestino}
+          onChange={(e) => setUnidadDestino(e.target.value)}
+        >
+          {Object.keys(periodosPorUnidad).map((u) => (
+            <option key={u} value={u}>
+              {u.charAt(0).toUpperCase() + u.slice(1)}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <form onSubmit={calcular} className="formulario">
-        <div className="input-group">
-          <label>Tasa Nominal Anual (%)</label>
+      <form onSubmit={handleCalcular} className="form-amort">
+        <div className="row">
+          <label>Tasa de interés ({unidadOrigen})</label>
           <input
-            name="tasaNominal"
+            name="tasa"
             type="number"
-            placeholder="Deja vacío para calcular"
-            step="0.000001"
-          />
-        </div>
-
-        <div className="input-group">
-          <label>Tasa Efectiva Anual (%)</label>
-          <input
-            name="tasaEfectiva"
-            type="number"
-            placeholder="Deja vacío para calcular"
-            step="0.000001"
-          />
-        </div>
-
-        <div className="input-group">
-          <label>Períodos de Capitalización por Año</label>
-          <input
-            name="periodos"
-            type="number"
-            placeholder="Deja vacío para calcular"
-            step="0.01"
-            min="0.01"
+            step="0.0001"
+            placeholder="Ej: 12 (para 12%)"
+            required
           />
           <small>
-            Ejemplos: 1 (anual), 2 (semestral), 4 (trimestral), 12 (mensual),
-            365 (diario)
+            Ingresa la tasa base (nominal o efectiva) que deseas convertir.
           </small>
         </div>
 
-        <button type="submit" className="btn-calcular">
-          Calcular
-        </button>
+        <div className="actions">
+          <button type="submit" className="btn-primary">
+            Calcular
+          </button>
+        </div>
       </form>
 
-      {error && (
-        <div className="error">
-          <p>{error}</p>
+      {formula && (
+        <div className="formula-box">
+          <h4>Fórmula utilizada</h4>
+          <pre>{formula}</pre>
+          <h4>Sustitución</h4>
+          <pre>{sustitucion}</pre>
         </div>
       )}
 
       {resultado && (
-        <div className="resultado-container">
-          <div className="resultado-principal">
-            <h3>{resultado.descripcion}</h3>
-            <div className="valor-resultado">
-              {resultado.valor.toFixed(2)} {resultado.unidad}
-            </div>
-          </div>
-
-          <div className="detalles-calculo">
-            <h4>Detalles del Cálculo:</h4>
-            {resultado.tipoCalculo === "nominal_efectiva" && (
-              <>
-                <p>
-                  <strong>Tasa Nominal:</strong> {resultado.tasaNominal}% anual
-                </p>
-                <p>
-                  <strong>Períodos:</strong> {resultado.periodos} por año
-                </p>
-                <p>
-                  <strong>Fórmula:</strong> {resultado.formula}
-                </p>
-                <p>
-                  <strong>Interpretación:</strong> Una tasa nominal de{" "}
-                  {resultado.tasaNominal}% capitalizada{" "}
-                  {getPeriodicidadNombre(resultado.periodos)}mente equivale a
-                  una tasa efectiva anual de {resultado.valor.toFixed(2)}%
-                </p>
-              </>
-            )}
-            {resultado.tipoCalculo === "efectiva_nominal" && (
-              <>
-                <p>
-                  <strong>Tasa Efectiva:</strong> {resultado.tasaEfectiva}%
-                  anual
-                </p>
-                <p>
-                  <strong>Períodos:</strong> {resultado.periodos} por año
-                </p>
-                <p>
-                  <strong>Fórmula:</strong> {resultado.formula}
-                </p>
-                <p>
-                  <strong>Interpretación:</strong> Para obtener una tasa
-                  efectiva de {resultado.tasaEfectiva}% anual, se necesita una
-                  tasa nominal de {resultado.valor.toFixed(2)}% capitalizada{" "}
-                  {getPeriodicidadNombre(resultado.periodos)}mente
-                </p>
-              </>
-            )}
-            {resultado.tipoCalculo === "calcular_periodos" && (
-              <>
-                <p>
-                  <strong>Tasa Nominal:</strong> {resultado.tasaNominal}%
-                </p>
-                <p>
-                  <strong>Tasa Efectiva:</strong> {resultado.tasaEfectiva}%
-                </p>
-                <p>
-                  <strong>Fórmula:</strong> {resultado.formula}
-                </p>
-                <p>
-                  <strong>Interpretación:</strong> Para convertir una tasa
-                  nominal de {resultado.tasaNominal}% a una tasa efectiva de{" "}
-                  {resultado.tasaEfectiva}%, se necesitan{" "}
-                  {resultado.valor.toFixed(2)} períodos de capitalización por
-                  año
-                </p>
-              </>
-            )}
-          </div>
+        <div className="resultado-amortizacion">
+          <h3>Resultado</h3>
+          <p>
+            <strong>Tasa convertida:</strong>{" "}
+            {formatPct(resultado.valor)} {resultado.unidadDestino}
+          </p>
         </div>
       )}
     </div>

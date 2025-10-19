@@ -35,13 +35,13 @@ const SistemasAmortizacion = ({ agregarAlHistorial }) => {
     // preparar fórmula y sustitución textual
     if (sistema === "frances") {
       setFormula("Cuota = (P × i) / (1 - (1 + i)^-n)");
-      setSustitucion(`Sustitución: ( ${capital} × ${i.toFixed(8)} ) / ( 1 - (1 + ${i.toFixed(8)})^-${periodos} )`);
+      setSustitucion(`Sustitución: ( ${capital} × ${i.toFixed(2)} ) / ( 1 - (1 + ${i.toFixed(2)})^-${periodos} )`);
     } else if (sistema === "aleman") {
       setFormula("A = P / n  ; cuota_k = A + (Saldo_{k-1} × i)");
       setSustitucion(`Sustitución: A = ${capital} / ${periodos} = ${formatNumber(capital / periodos)}`);
     } else {
       setFormula("I = P × i  ; cuota_k = I (cada periodo), amortización = P al final");
-      setSustitucion(`Sustitución: I = ${capital} × ${i.toFixed(8)} = ${formatNumber(capital * i)}`);
+      setSustitucion(`Sustitución: I = ${capital} × ${i.toFixed(2)} = ${formatNumber(capital * i)}`);
     }
 
     // calcular
