@@ -163,7 +163,7 @@ const Anualidades = ({ agregarAlHistorial }) => {
 
   return (
     <div className="amortizacion">
-      <h2>💰 Anualidades — Ordinaria / Anticipada</h2>
+      <h2>Anualidades — Ordinaria / Anticipada</h2>
 
       <div className="controls-row">
         <label>Tipo de Cálculo:</label>
@@ -184,8 +184,8 @@ const Anualidades = ({ agregarAlHistorial }) => {
 
         <label>Tipo de Anualidad:</label>
         <select value={tipoAnualidad} onChange={(e) => setTipoAnualidad(e.target.value)}>
-          <option value="ordinaria">📅 Ordinaria (vencida)</option>
-          <option value="anticipada">💸 Anticipada (adelantada)</option>
+          <option value="ordinaria"> Ordinaria (vencida)</option>
+          <option value="anticipada"> Anticipada (adelantada)</option>
         </select>
       </div>
 
@@ -193,7 +193,7 @@ const Anualidades = ({ agregarAlHistorial }) => {
         {/* Renta */}
         {(tipoCalculo === "valorFuturo" || tipoCalculo === "valorPresente" || tipoCalculo === "tiempo") && (
           <div className="row">
-            <label>💵 Pago Periódico (R)</label>
+            <label> Pago Periódico (R)</label>
             <input name="renta" type="number" step="0.01" placeholder="Ej: 500" required />
             <small>Pago que se repite cada periodo.</small>
           </div>
@@ -202,7 +202,7 @@ const Anualidades = ({ agregarAlHistorial }) => {
         {/* Valor Futuro */}
         {(tipoCalculo === "renta" || tipoCalculo === "tiempo") && (
           <div className="row">
-            <label>🏁 Valor Futuro (F)</label>
+            <label> Valor Futuro (F)</label>
             <input name="futuro" type="number" step="0.01" placeholder="Ej: 10000" />
             <small>Si se conoce, se puede usar para calcular R o n.</small>
           </div>
@@ -211,7 +211,7 @@ const Anualidades = ({ agregarAlHistorial }) => {
         {/* Valor Presente */}
         {(tipoCalculo === "renta" || tipoCalculo === "valorPresente") && (
           <div className="row">
-            <label>🏦 Valor Presente (P)</label>
+            <label> Valor Presente (P)</label>
             <input name="presente" type="number" step="0.01" placeholder="Ej: 8000" />
             <small>Si se conoce, se puede usar para hallar R.</small>
           </div>
@@ -220,7 +220,7 @@ const Anualidades = ({ agregarAlHistorial }) => {
         {/* Tasa */}
         {tipoCalculo !== "tiempo" && (
           <div className="row">
-            <label>📈 Tasa de Interés ({unidad})</label>
+            <label> Tasa de Interés ({unidad})</label>
             <input name="tasa" type="number" step="0.0001" placeholder="Ej: 6 (para 6%)" required />
           </div>
         )}
@@ -257,9 +257,9 @@ const Anualidades = ({ agregarAlHistorial }) => {
       {/* Fórmula y sustitución */}
       {formula && (
         <div className="formula-box">
-          <h4>📘 Fórmula utilizada</h4>
+          <h4> Fórmula utilizada</h4>
           <pre>{formula}</pre>
-          <h4>🧮 Sustitución</h4>
+          <h4>Sustitución</h4>
           <pre>{sustitucion}</pre>
         </div>
       )}

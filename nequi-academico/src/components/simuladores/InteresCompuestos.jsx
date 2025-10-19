@@ -119,7 +119,7 @@ const InteresCompuesto = ({ agregarAlHistorial }) => {
 
   return (
     <div className="amortizacion">
-      <h2>📈 Interés Compuesto — Calculadora Completa</h2>
+      <h2>Interés Compuesto — Calculadora Completa</h2>
 
       <div className="controls-row">
         <label>Tipo de Cálculo:</label>
