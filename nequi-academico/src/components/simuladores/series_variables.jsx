@@ -27,25 +27,28 @@ const SeriesVar = () => {
     let inum = parseFloat(i);
     const nnum = parseInt(n, 10);
 
-    // Normalizar la tasa: aceptar 12 o 0.12
     if (isNaN(inum) || isNaN(nnum) || isNaN(Rnum) || isNaN(gnum)) {
       setError("Valores numéricos inválidos.");
       return;
     }
-    if (Math.abs(inum) > 1) inum = inum / 100; // si ingreso 8 -> 0.08
+    if (Math.abs(inum) > 1) inum = inum / 100; // Si ingreso 8 -> 0.08
 
-    // calcular P/A
+    // Calcular factores
     const factorPA = (Math.pow(1 + inum, nnum) - 1) / (inum * Math.pow(1 + inum, nnum));
-
-    // calcular P/G correctamente: (P/A - n/(1+i)^n) / i
     const factorPG = (factorPA - nnum / Math.pow(1 + inum, nnum)) / inum;
-
     const VP = Rnum * factorPA + gnum * factorPG;
 
-    // construir la formula para mostrar
-    const formulaTexto = `VP = ${Rnum} * ( (1+${inum.toFixed(6)})^${nnum} - 1 ) / ( ${inum.toFixed(6)} * (1+${inum.toFixed(6)})^${nnum} )
-+ ${gnum} * ( ( (1+${inum.toFixed(6)})^${nnum} - 1 ) / ( ${inum.toFixed(6)} * (1+${inum.toFixed(6)})^${nnum} ) - ${nnum} / (1+${inum.toFixed(6)})^${nnum} ) / ${inum.toFixed(6)}
-`;
+    // Construir la fórmula numérica paso a paso
+    const formulaTexto = `
+VP = R * (P/A, i, n) + g * (P/G, i, n)
+VP = ${Rnum} * ${factorPA.toFixed(6)} + ${gnum} * ${factorPG.toFixed(6)}
+VP = ${(Rnum * factorPA).toFixed(2)} + ${(gnum * factorPG).toFixed(2)}
+VP = ${VP.toFixed(2)}
+
+Donde:
+P/A = ((1 + ${inum.toFixed(6)})^${nnum} - 1) / (${inum.toFixed(6)} * (1 + ${inum.toFixed(6)})^${nnum}) = ${factorPA.toFixed(6)}
+P/G = ((P/A) - ${nnum}/(1 + ${inum.toFixed(6)})^${nnum}) / ${inum.toFixed(6)} = ${factorPG.toFixed(6)}
+    `;
 
     setResultado(VP.toFixed(2));
     setFormula(formulaTexto);
@@ -79,7 +82,9 @@ const SeriesVar = () => {
           <input type="number" value={n} onChange={(e) => setN(e.target.value)} placeholder="Ej: 5" />
         </div>
 
-        <button className="btn-calcular" onClick={calcularVP}>Calcular Valor Presente (VP)</button>
+        <button className="btn-calcular" onClick={calcularVP}>
+          Calcular Valor Presente (VP)
+        </button>
       </div>
 
       {error && <p className="error">{error}</p>}
@@ -93,7 +98,7 @@ const SeriesVar = () => {
             <p><strong>P/A:</strong> {paVal !== null ? paVal.toFixed(6) : "-"}</p>
             <p><strong>P/G:</strong> {pgVal !== null ? pgVal.toFixed(6) : "-"}</p>
             <div className="formula">
-              <strong>Fórmula con valores:</strong>
+              <strong>Desarrollo paso a paso:</strong>
               <pre style={{ whiteSpace: "pre-wrap" }}>{formula}</pre>
             </div>
           </div>
