@@ -5,16 +5,20 @@ import {
   calcularAleman,
   calcularAmericano,
   tasaPorPeriodo,
-  //periodsPerYearFromUnit,
 } from "../../utils/amortizacion";
 import "../../styles/amortizacion.css";
 
-const formatCurrency = (v) => Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const formatNumber = (v) => Number(v).toLocaleString(undefined, { maximumFractionDigits: 8 });
+const formatCurrency = (v) =>
+  Number(v).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+const formatNumber = (v) =>
+  Number(v).toLocaleString(undefined, { maximumFractionDigits: 8 });
 
 const SistemasAmortizacion = ({ agregarAlHistorial }) => {
   const [sistema, setSistema] = useState("frances");
-  const [unidad, setUnidad] = useState("mensual"); // this single unit applies to both tasa and periodos
+  const [unidad, setUnidad] = useState("mensual");
   const [resultado, setResultado] = useState(null);
   const [formula, setFormula] = useState("");
   const [sustitucion, setSustitucion] = useState("");
@@ -26,48 +30,62 @@ const SistemasAmortizacion = ({ agregarAlHistorial }) => {
 
     const capital = parseFloat(data.capital) || 0;
     const tasaValor = parseFloat(data.tasa) || 0;
-    const periodos = Math.max(1, Math.round(parseFloat(data.periodos) || 0)); // n
-    const unidadSeleccionada = unidad; // single unidad
+    const periodos = Math.max(1, Math.round(parseFloat(data.periodos) || 0));
+    const unidadSeleccionada = unidad;
 
-    // tasa por periodo decimal (respeta la unidad escogida)
     const i = tasaPorPeriodo(tasaValor, unidadSeleccionada, unidadSeleccionada);
+    let calculo = null;
 
-    // preparar fórmula y sustitución textual
+    // Asignar fórmulas y sustituciones
     if (sistema === "frances") {
       setFormula("Cuota = (P × i) / (1 - (1 + i)^-n)");
-      setSustitucion(`Sustitución: ( ${capital} × ${i.toFixed(2)} ) / ( 1 - (1 + ${i.toFixed(2)})^-${periodos} )`);
-    } else if (sistema === "aleman") {
-      setFormula("A = P / n  ; cuota_k = A + (Saldo_{k-1} × i)");
-      setSustitucion(`Sustitución: A = ${capital} / ${periodos} = ${formatNumber(capital / periodos)}`);
-    } else {
-      setFormula("I = P × i  ; cuota_k = I (cada periodo), amortización = P al final");
-      setSustitucion(`Sustitución: I = ${capital} × ${i.toFixed(2)} = ${formatNumber(capital * i)}`);
-    }
-
-    // calcular
-    let calculo;
-    if (sistema === "frances") calculo = calcularFrances(capital, tasaValor, unidadSeleccionada, periodos, unidadSeleccionada);
-    else if (sistema === "aleman") calculo = calcularAleman(capital, tasaValor, unidadSeleccionada, periodos, unidadSeleccionada);
-    else calculo = calcularAmericano(capital, tasaValor, unidadSeleccionada, periodos, unidadSeleccionada);
-
-    // construir registro (para historial)
-    const registro = {
-      categoria: "Amortizacion",
-      sistema,
-      variables: {
+      setSustitucion(
+        `Sustitución: (${capital} × ${i.toFixed(6)}) / (1 - (1 + ${i.toFixed(
+          6
+        )})^-${periodos})`
+      );
+      calculo = calcularFrances(
         capital,
         tasaValor,
-        unidad,
+        unidadSeleccionada,
         periodos,
-      },
-      resultado: {
-        tabla: calculo.tabla,
-        totalPago: calculo.totalPago,
-        totalInteres: calculo.totalInteres,
-        cuota: calculo.cuota || null,
-        n: calculo.n,
-        i: calculo.i,
-      },
+        unidadSeleccionada
+      );
+    } else if (sistema === "aleman") {
+      setFormula("Capital = Deuda / Tiempo\nIntereses = Saldo × i\nCuota = Interés + Capital");
+      setSustitucion(
+        `Sustitución: Amortización (constante) = ${capital} / ${periodos} = ${formatNumber(
+          capital / periodos
+        )}`
+      );
+      calculo = calcularAleman(
+        capital,
+        tasaValor,
+        unidadSeleccionada,
+        periodos,
+        unidadSeleccionada
+      );
+    } else {
+      setFormula("I = P × i\nCuota_k = I (cada periodo), amortización = P al final");
+      setSustitucion(
+        `Sustitución: I = ${capital} × ${i.toFixed(6)} = ${formatNumber(
+          capital * i
+        )}`
+      );
+      calculo = calcularAmericano(
+        capital,
+        tasaValor,
+        unidadSeleccionada,
+        periodos,
+        unidadSeleccionada
+      );
+    }
+
+    const registro = {
+      categoria: "Amortización",
+      sistema,
+      variables: { capital, tasaValor, unidad, periodos },
+      resultado: calculo,
       formula,
       sustitucion,
       fecha: new Date().toLocaleString(),
@@ -75,8 +93,13 @@ const SistemasAmortizacion = ({ agregarAlHistorial }) => {
 
     if (typeof agregarAlHistorial === "function") agregarAlHistorial(registro);
     setResultado(registro);
-
     e.target.reset();
+  };
+
+  // Helper para leer campo capital/amortizacion en las filas (compatibilidad)
+  const filaCapital = (r) => {
+    // priorizamos 'capital', luego 'amortizacion', luego 'abono'
+    return r.capital ?? r.amortizacion ?? r.abono ?? 0;
   };
 
   return (
@@ -85,10 +108,13 @@ const SistemasAmortizacion = ({ agregarAlHistorial }) => {
 
       <div className="controls-row">
         <label>Sistema</label>
-        <select value={sistema} onChange={(e) => setSistema(e.target.value)}>
+        <select
+          value={sistema}
+          onChange={(e) => setSistema(e.target.value)}
+        >
           <option value="frances">Francés (cuota constante)</option>
           <option value="aleman">Alemán (amortización constante)</option>
-          <option value="americano">Americano (bullet)</option>
+          <option value="americano">Americano (pago final)</option>
         </select>
 
         <label>Unidad (aplica a tasa y periodo)</label>
@@ -102,50 +128,93 @@ const SistemasAmortizacion = ({ agregarAlHistorial }) => {
 
       <form onSubmit={handleCalcular} className="form-amort">
         <div className="row">
-          <label>Capital (P)</label>
-          <input name="capital" type="number" step="0.01" required />
+          <label> Capital (P)</label>
+          <input
+            name="capital"
+            type="number"
+            step="0.01"
+            placeholder="Ej: 100000"
+            required
+          />
+          <small>Monto total del préstamo o deuda.</small>
         </div>
 
         <div className="row">
-          <label>Tasa ({unidad})</label>
-          <input name="tasa" type="number" step="0.0001" required />
-          <span className="hint">Ingresa la tasa en la unidad seleccionada (ej: 1.5 si es 1.5% {unidad}).</span>
+          <label> Tasa de Interés ({unidad})</label>
+          <input
+            name="tasa"
+            type="number"
+            step="0.0001"
+            placeholder="Ej: 1.5 (para 1.5%)"
+            required
+          />
+          <small>La tasa debe coincidir con la unidad de tiempo seleccionada.</small>
         </div>
 
         <div className="row">
-          <label>Plazo (n) [{unidad}]</label>
-          <input name="periodos" type="number" min="1" step="1" required />
-          <span className="hint">Número de periodos en la unidad seleccionada.</span>
+          <label> Plazo (n) [{unidad}]</label>
+          <input
+            name="periodos"
+            type="number"
+            min="1"
+            step="1"
+            placeholder="Ej: 12"
+            required
+          />
+          <small>Número total de periodos de pago.</small>
         </div>
 
         <div className="actions">
-          <button type="submit" className="btn-primary">Calcular</button>
+          <button type="submit" className="btn-primary">
+            Calcular
+          </button>
         </div>
       </form>
 
-      {/* Fórmula y sustitución */}
       {formula && (
         <div className="formula-box">
-          <h4>Fórmula</h4>
+          <h4> Fórmula utilizada</h4>
           <pre>{formula}</pre>
-          <h4>Sustitución</h4>
+          <h4> Sustitución</h4>
           <pre>{sustitucion}</pre>
         </div>
       )}
 
-      {/* Resultado */}
-      {resultado && (
+      {resultado && resultado.resultado && (
         <div className="resultado-amortizacion">
-          <h3>Resultado — {resultado.sistema.toUpperCase()}</h3>
+          <h3>
+            Resultado —{" "}
+            {resultado.sistema.charAt(0).toUpperCase() +
+              resultado.sistema.slice(1)}
+          </h3>
 
           <div className="resumen-general">
-            <p><strong>Capital:</strong> {formatCurrency(resultado.variables.capital)} COP</p>
-            <p><strong>Tasa (por {unidad}):</strong> {resultado.variables.tasaValor} %</p>
-            <p><strong>Períodos (n):</strong> {resultado.variables.periodos} {unidad}</p>
-            <p><strong>Total pagado:</strong> {formatCurrency(resultado.resultado.totalPago || resultado.resultado.totalPayment || 0)} COP</p>
-            <p><strong>Total intereses:</strong> {formatCurrency(resultado.resultado.totalInteres || 0)} COP</p>
-            {resultado.resultado.cuota != null && (
-              <p><strong>Cuota (si aplica):</strong> {formatCurrency(resultado.resultado.cuota)} COP</p>
+            <p>
+              <strong>Capital Inicial:</strong>{" "}
+              {formatCurrency(resultado.variables.capital)} COP
+            </p>
+            <p>
+              <strong>Tasa:</strong> {resultado.variables.tasaValor}% {unidad}
+            </p>
+            <p>
+              <strong>Periodos:</strong> {resultado.variables.periodos} {unidad}
+            </p>
+
+            {resultado.resultado.resumen && (
+              <>
+                <p>
+                  <strong>Total Intereses:</strong>{" "}
+                  {formatCurrency(resultado.resultado.resumen.totalInteres)} COP
+                </p>
+                <p>
+                  <strong>Total Pagado:</strong>{" "}
+                  {formatCurrency(resultado.resultado.resumen.totalPagado)} COP
+                </p>
+                <p>
+                  <strong>Saldo Final:</strong>{" "}
+                  {formatCurrency(resultado.resultado.resumen.saldoFinal)} COP
+                </p>
+              </>
             )}
           </div>
 
@@ -153,21 +222,21 @@ const SistemasAmortizacion = ({ agregarAlHistorial }) => {
             <table>
               <thead>
                 <tr>
-                  <th>Periodo</th>
-                  <th>Saldo capital</th>
-                  <th>Interés por cuota</th>
-                  <th>Amortización</th>
+                  <th>N° Periodo</th>
                   <th>Cuota</th>
+                  <th>Interés</th>
+                  <th>Capital</th>
+                  <th>Saldo</th>
                 </tr>
               </thead>
               <tbody>
                 {resultado.resultado.tabla.map((r) => (
                   <tr key={r.periodo}>
                     <td style={{ textAlign: "center" }}>{r.periodo}</td>
-                    <td>{formatCurrency(r.saldoAntesPago)}</td>
-                    <td>{formatCurrency(r.interes)}</td>
-                    <td>{formatCurrency(r.amortizacion)}</td>
-                    <td>{formatCurrency(r.cuota)}</td>
+                    <td>{formatCurrency(r.cuota ?? 0)}</td>
+                    <td>{formatCurrency(r.interes ?? 0)}</td>
+                    <td>{formatCurrency(filaCapital(r))}</td>
+                    <td>{formatCurrency(r.saldo ?? 0)}</td>
                   </tr>
                 ))}
               </tbody>
