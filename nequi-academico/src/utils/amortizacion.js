@@ -44,41 +44,62 @@ export const tasaPorPeriodo = (tasaValor, unidadTasa, unidadPeriodo) => {
 
 // === Amortizaciones (reciben: capital, tasaValor, unidadTasa, n (periodos), unidadPeriodo) ===
 
-// Francés (cuotas constantes) -- se usa tu fórmula: (P * i) / (1 - (1 + i)^-n)
+// 📘 Amortización Francesa — Cuotas Constantes
 export const calcularFrances = (capital, tasaValor, unidadTasa, n, unidadPeriodo) => {
-  const i = tasaPorPeriodo(tasaValor, unidadTasa, unidadPeriodo); // decimal por periodo
-  const cuota = i === 0 ? (capital / (n || 1)) : (capital * i) / (1 - Math.pow(1 + i, -n));
+  // 1️⃣ Tasa de interés efectiva por periodo
+  const i = tasaPorPeriodo(tasaValor, unidadTasa, unidadPeriodo); // Decimal por periodo
 
+  // 2️⃣ Cálculo de cuota fija
+  const cuota = i === 0 
+    ? capital / (n || 1)
+    : (capital * i) / (1 - Math.pow(1 + i, -n));
+
+  // 3️⃣ Variables de control
   let saldo = capital;
-  const tabla = [];
   let totalInteres = 0;
   let totalPago = 0;
 
+  const tabla = [];
+
+  // 4️⃣ Generación de la tabla de amortización
   for (let k = 1; k <= n; k++) {
-    const interes = saldo * i;
-    const amortizacion = cuota - interes;
-    saldo = Math.max(0, saldo - amortizacion);
+    const interes = saldo * i;                    // Interés del periodo
+    const amortizacion = cuota - interes;         // Abono a capital
+    const saldoFinal = saldo - amortizacion;      // Nuevo saldo
 
     totalInteres += interes;
     totalPago += cuota;
 
     tabla.push({
       periodo: k,
-      saldoAntesPago: +Number((saldo + amortizacion).toFixed(8)), // saldo before amortization
-      interes: +interes,
-      amortizacion: +amortizacion,
-      cuota: +cuota,
-      saldo: +saldo,
+      cuota: +cuota.toFixed(2),
+      interes: +interes.toFixed(2),
+      capital: +amortizacion.toFixed(2),
+      saldo: +Math.max(0, saldoFinal).toFixed(2),
     });
+
+    saldo = saldoFinal;
   }
 
-  return { tabla, cuota, totalInteres, totalPago, n, i };
+  // 5️⃣ Resultados globales
+  const resumen = {
+    capitalInicial: +capital.toFixed(2),
+    cuota: +cuota.toFixed(2),
+    totalInteres: +totalInteres.toFixed(2),
+    totalPagado: +totalPago.toFixed(2),
+    saldoFinal: +saldo.toFixed(2),
+    tasaPorPeriodo: +(i * 100).toFixed(6) + " %",
+    periodos: n,
+  };
+
+  return { tabla, resumen };
 };
+
 
 // Alemán (amortizacion constante)
 export const calcularAleman = (capital, tasaValor, unidadTasa, n, unidadPeriodo) => {
-  const i = tasaPorPeriodo(tasaValor, unidadTasa, unidadPeriodo);
-  const amortizacion = capital / (n || 1);
+  const i = tasaPorPeriodo(tasaValor, unidadTasa, unidadPeriodo); // tasa decimal
+  const amortizacion = capital / (n || 1); // abono constante a capital
 
   let saldo = capital;
   const tabla = [];
@@ -87,52 +108,72 @@ export const calcularAleman = (capital, tasaValor, unidadTasa, n, unidadPeriodo)
 
   for (let k = 1; k <= n; k++) {
     const saldoAntes = saldo;
-    const interes = saldoAntes * i;
-    const cuota = amortizacion + interes;
-    saldo = Math.max(0, saldo - amortizacion);
+    const interes = saldoAntes * i; // interés decreciente
+    const cuota = amortizacion + interes; // cuota variable
+    saldo = Math.max(0, saldo - amortizacion); // saldo después del pago
 
     totalInteres += interes;
     totalPago += cuota;
 
     tabla.push({
       periodo: k,
-      saldoAntesPago: +Number(saldoAntes.toFixed(8)),
-      interes: +interes,
-      amortizacion: +amortizacion,
-      cuota: +cuota,
-      saldo: +saldo,
+      saldoAntesPago: +Number(saldoAntes.toFixed(8)), // saldo antes del pago
+      interes: +interes.toFixed(2),
+      capital: +amortizacion.toFixed(2),
+      cuota: +cuota.toFixed(2),
+      saldo: +saldo.toFixed(2),
     });
   }
 
-  return { tabla, amortizacion, totalInteres, totalPago, n, i };
+  const resumen = {
+    capitalInicial: capital,
+    amortizacionConstante: amortizacion,
+    totalInteres: totalInteres,
+    totalPagado: totalPago,
+    saldoFinal: saldo,
+    tasaPorPeriodo: `${(i * 100).toFixed(4)}%`,
+  };
+
+  return { tabla, resumen, n, i };
 };
 
+
 // Americano (bullet) - intereses periódicos y capital al final
+
 export const calcularAmericano = (capital, tasaValor, unidadTasa, n, unidadPeriodo) => {
-  const i = tasaPorPeriodo(tasaValor, unidadTasa, unidadPeriodo);
+  const i = tasaPorPeriodo(tasaValor, unidadTasa, unidadPeriodo); 
   const tabla = [];
   let totalInteres = 0;
   let totalPago = 0;
 
   for (let k = 1; k <= n; k++) {
-    const saldoAntes = capital;
-    const interes = capital * i;
-    const amortizacion = (k === n) ? capital : 0;
-    const cuota = interes + amortizacion;
-    const saldo = (k === n) ? 0 : capital;
+    //const saldoAntes = capital;
+    const interes = capital * i; 
+    const capitalPago = k === n ? capital : 0; 
+    const cuota = interes + capitalPago;
+    const saldo = k === n ? 0 : capital; 
 
     totalInteres += interes;
     totalPago += cuota;
 
     tabla.push({
       periodo: k,
-      saldoAntesPago: +Number(saldoAntes.toFixed(8)),
-      interes: +interes,
-      amortizacion: +amortizacion,
-      cuota: +cuota,
-      saldo: +saldo,
+      interes: +interes.toFixed(2),
+      capital: +capitalPago.toFixed(2),
+      cuota: +cuota.toFixed(2),
+      saldo: +saldo.toFixed(2),
     });
   }
 
-  return { tabla, totalInteres, totalPago, n, i };
+  const resumen = {
+    capitalInicial: +capital.toFixed(2),
+    tasaPorPeriodo: `${(i * 100).toFixed(4)}%`,
+    totalInteres: +totalInteres.toFixed(2),
+    totalPagado: +totalPago.toFixed(2),
+    saldoFinal: 0,
+    periodos: n,
+  };
+
+  return { tabla, resumen, n, i };
 };
+
