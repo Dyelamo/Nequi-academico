@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import { tasaPorPeriodo } from "../../utils/amortizacion";
 import "../../styles/amortizacion.css";
 
+import interesSimple from "../../utils/img/interesSimple.png"
+
 const formatCurrency = (v) =>
   Number(v).toLocaleString(undefined, {
     minimumFractionDigits: 2,
@@ -127,7 +129,8 @@ const InteresSimple = ({ agregarAlHistorial }) => {
 
   return (
     <div className="amortizacion">
-      <h2>Interés Simple — Calculadora Completa</h2>
+      <h2>Interés Simple</h2>
+      {/* <img src={interesSimple} alt="" /> */}
 
       <div className="controls-row">
         <label>Tipo de Cálculo:</label>

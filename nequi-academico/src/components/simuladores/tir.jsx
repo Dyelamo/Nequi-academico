@@ -8,10 +8,12 @@ const TIR = () => {
   const [inversion, setInversion] = useState("");
   const [periodos, setPeriodos] = useState("");
   const [unidad, setUnidad] = useState("años");
+  const [tasaDescuento, setTasaDescuento] = useState("");
   const [flujos, setFlujos] = useState([]);
   const [resultado, setResultado] = useState(null);
   const [error, setError] = useState("");
   const [formula, setFormula] = useState("");
+  const [mensajeRentabilidad, setMensajeRentabilidad] = useState("");
 
   // Genera los campos dinámicos para los flujos
   const generarFlujos = () => {
@@ -38,12 +40,22 @@ const TIR = () => {
 
     const inversionInicial = parseFloat(inversion);
     const flujosNum = flujos.map(f => parseFloat(f));
+    let tasaD = parseFloat(tasaDescuento);
+
+    if (isNaN(tasaD)) {
+      setError("Por favor ingrese una tasa de descuento válida.");
+      return;
+    }
+
+    // Normalizar tasa si se ingresa como porcentaje
+    if (Math.abs(tasaD) > 1) tasaD = tasaD / 100;
 
     const VAN = (tasa) =>
       -inversionInicial + flujosNum.reduce((acc, f, i) => acc + f / Math.pow(1 + tasa, i + 1), 0);
 
-    let tir = 0.1;
+    let tir = 0.1; // Valor inicial (10%)
     let iter = 0;
+
     while (iter < 1000) {
       const f = VAN(tir);
       const df = (VAN(tir + 0.00001) - f) / 0.00001;
@@ -53,8 +65,17 @@ const TIR = () => {
       iter++;
     }
 
-    setResultado((tir * 100).toFixed(4));
+    const tirPorcentaje = tir * 100;
+    setResultado(tirPorcentaje.toFixed(4));
     setError("");
+
+    // Determinar si es rentable
+    const rentable = tir >= tasaD;
+    setMensajeRentabilidad(
+      rentable
+        ? "✅ El proyecto es rentable: la TIR es mayor o igual que la tasa de descuento."
+        : "❌ El proyecto NO es rentable: la TIR es menor que la tasa de descuento."
+    );
 
     // Generar representación de la fórmula final
     const partes = flujosNum
@@ -68,8 +89,8 @@ const TIR = () => {
   return (
     <div className="calculadora-container simulador-tir">
       <h2>Simulador de Tasa Interna de Retorno (TIR)</h2>
-      <img src={tir_img} alt="" />
-      <img src={tir2} alt="" />
+      {/* <img src={tir_img} alt="" />
+      <img src={tir2} alt="" /> */}
 
       <div className="formulario">
         <div className="input-group">
@@ -79,6 +100,16 @@ const TIR = () => {
             value={inversion}
             onChange={(e) => setInversion(e.target.value)}
             placeholder="Ejemplo: 10000"
+          />
+        </div>
+
+        <div className="input-group">
+          <label>Tasa de Descuento</label>
+          <input
+            type="number"
+            value={tasaDescuento}
+            onChange={(e) => setTasaDescuento(e.target.value)}
+            placeholder="Ejemplo: 10 o 0.10"
           />
         </div>
 
@@ -138,10 +169,46 @@ const TIR = () => {
           <div className="valor-resultado">{resultado}%</div>
           <p>TIR {unidad === "años" ? "anual" : "mensual"} estimada</p>
 
+          <div
+            style={{
+              fontWeight: "bold",
+              fontSize: "1.1em",
+              marginTop: "10px",
+              color: mensajeRentabilidad.includes("NO") ? "red" : "green",
+            }}
+          >
+            {mensajeRentabilidad}
+          </div>
+
           {formula && (
             <div className="formula-box">
-              <h4>Fórmula utilizada:</h4>
-              <p style={{ fontFamily: "monospace", fontSize: "1.1em", background: "#f6f6f6", padding: "10px", borderRadius: "8px" }}>
+              <h4>Fórmula general de la TIR:</h4>
+              <p
+                style={{
+                  fontFamily: "monospace",
+                  fontSize: "1.1em",
+                  background: "#eef2f6",
+                  padding: "10px",
+                  borderRadius: "8px",
+                  textAlign: "center",
+                }}
+              >
+                0 = -C₀ + Σ [ Fₜ / (1 + r)ᵗ ]
+              </p>
+              <small style={{ display: "block", marginTop: "5px", textAlign: "center" }}>
+                donde C₀ es la inversión inicial, Fₜ los flujos netos y r la tasa interna de retorno.
+              </small>
+
+              <h4 style={{ marginTop: "15px" }}>Fórmula con los valores ingresados:</h4>
+              <p
+                style={{
+                  fontFamily: "monospace",
+                  fontSize: "1.1em",
+                  background: "#f6f6f6",
+                  padding: "10px",
+                  borderRadius: "8px",
+                }}
+              >
                 {formula}
               </p>
             </div>
